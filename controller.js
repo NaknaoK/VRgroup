@@ -8,10 +8,16 @@ import WebXRPolyfill from "webxr-polyfill";
 import { XRControllerModelFactory } from 'https://unpkg.com/three@0.150.1/examples/jsm/webxr/XRControllerModelFactory.js';
 //PC上で滑らかにカメラコントローラーを制御する為に使用↓
 import { OrbitControls } from 'https://unpkg.com/three@0.150.1/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 let controller1, controller2;
 let controllerGrip1, controllerGrip2;
+let data = [];
 
-function init() {
+/* ----Map関係---- */
+
+/* ----Map関係---- */ 
+
+async function init() {
   /* ----基本的な設定----- */
   // WebXRのポリフィルを有効にする
   const polyfill = new WebXRPolyfill();
@@ -39,6 +45,8 @@ function init() {
   // カメラを作成
   const camera = new THREE.PerspectiveCamera(90, width / height);
 
+  //CSVデータを格納するやつら
+  //let data = [1][4];
   
   // カメラ用コンテナを作成(3Dのカメラ？) 
   const cameraContainer = new THREE.Object3D();
@@ -46,7 +54,6 @@ function init() {
   scene.add(cameraContainer);
   cameraContainer.position.x = 0;
   
-
   // 光源を作成
   {
     const spotLight = new THREE.SpotLight(
@@ -68,12 +75,36 @@ function init() {
 		scene.add( light );
   }
   /* ----基本的な設定----- */
+  /* ----Map関係---- */
+  // GLTF形式のモデルデータを読み込む
+  const loader = new GLTFLoader();
+  // GLTFファイルのパスを指定
+  const objects = await loader.loadAsync("e.glb");
+  // 読み込み後に3D空間に追加
+  const model = objects.scene;
+  scene.add(model);
+  model.scale.set(0.01, 0.01, 0.01); // 大きさ0.01倍に拡大
+  /* ----Map関係---- */
+  /* ----CSV関係---- */
+  var req = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
+  req.open("get", "syuukei04.csv", true); // アクセスするファイルを指定
+  req.overrideMimeType("text/plain; charset=Shift_JIS");//文字コードの上書き
+  req.send(null); // HTTPリクエストの発行
   
+  // レスポンスが返ってきたらconvertCSVtoArray()を呼ぶ	
+  let d = 0;
+  req.onload = function(){
+	  convertCSVtoArray(req.responseText); // 渡されるのは読み込んだCSVデータ
+    d = data[1][4];
+    // 立方体の作成
+    const cube = createCube();
+    console.log(d);
+    cube.position.set( data[1][4]/100, 0, -500);
+    scene.add(cube);
+  }
+  /* ----CSV関係---- */
 
-  // 立方体の作成
-  const cube = createCube();
-  cube.position.set( -500, 0, -500);
-  scene.add(cube);
+  
 
   /* ----コントローラー設定----- */
   
@@ -170,4 +201,14 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
   }
 }
-
+// 読み込んだCSVデータを二次元配列に変換する関数convertCSVtoArray()の定義
+function convertCSVtoArray(str){ // 読み込んだCSVデータが文字列として渡される
+  //let result = []; // 最終的な二次元配列を入れるための配列
+  let tmp = str.split("\n"); // 改行を区切り文字として行を要素とした配列を生成
+  // 各行ごとにカンマで区切った文字列を要素とした二次元配列を生成
+  for(var i=0;i<tmp.length;++i){
+    data[i] = tmp[i].split(',');
+  }
+  console.log(data[1][4]);
+  //return result; //result[1][4]の値を返す
+}
