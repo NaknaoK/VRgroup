@@ -83,7 +83,7 @@ async function init() {
   // 読み込み後に3D空間に追加
   const model = objects.scene;
   scene.add(model);
-  model.scale.set(0.1, 0.1, 0.1); // 大きさ0.01倍に拡大
+  model.scale.set(1, 1, 1); // 大きさ0.01倍に拡大
   /* ----Map関係---- */
   /* ----CSV関係---- */
   var req = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
