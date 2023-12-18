@@ -79,11 +79,19 @@ async function init() {
   // GLTF形式のモデルデータを読み込む
   const loader = new GLTFLoader();
   // GLTFファイルのパスを指定
-  const objects = await loader.loadAsync("e.glb");
+  const objects = await loader.loadAsync("gltf/53394611_bldg_6697_2_op/53394611_bldg_6697_2_op.gltf");
   // 読み込み後に3D空間に追加
-  const model = objects.scene;
-  scene.add(model);
-  model.scale.set(1, 1, 1); // 大きさ0.01倍に拡大
+  const model1 = objects.scene;
+  scene.add(model1);
+  //
+  const objects2 = await loader.loadAsync("gltf/533946_dem_6697_op/533946_dem_6697_op.gltf");
+  // 読み込み後に3D空間に追加
+  const model2 = objects2.scene;
+  scene.add(model2);
+  //
+  model1.scale.set(0.01, 0.01, 0.01); // 大きさ0.01倍に拡大
+  model2.scale.set(0.01, 0.01, 0.01); // 大きさ0.01倍に拡大
+  
   /* ----Map関係---- */
   /* ----CSV関係---- */
   var req = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
