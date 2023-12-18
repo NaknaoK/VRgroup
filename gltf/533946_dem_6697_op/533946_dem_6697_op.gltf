@@ -1,0 +1,126 @@
+{
+    "asset": {
+        "version": "2.0"
+    },
+    "accessors": [
+        {
+            "bufferView": 0,
+            "componentType": 5126,
+            "count": 28104,
+            "type": "VEC3",
+            "max": [
+                584.9818115234375,
+                5.71750020980835,
+                485.91168212890625
+            ],
+            "min": [
+                -591.0181884765625,
+                -10.32450008392334,
+                -484.08831787109375
+            ]
+        },
+        {
+            "bufferView": 1,
+            "componentType": 5126,
+            "count": 28104,
+            "type": "VEC2"
+        },
+        {
+            "bufferView": 2,
+            "componentType": 5125,
+            "count": 28104,
+            "type": "SCALAR"
+        }
+    ],
+    "bufferViews": [
+        {
+            "buffer": 0,
+            "byteOffset": 0,
+            "byteLength": 337248,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 337248,
+            "byteLength": 224832,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 562080,
+            "byteLength": 112416,
+            "target": 34963
+        }
+    ],
+    "buffers": [
+        {
+            "byteLength": 674496,
+            "uri": "533946_dem_6697_op.bin"
+        }
+    ],
+    "images": [
+        {
+            "uri": "textures/combined_map_for_mesh_0_0.png"
+        }
+    ],
+    "materials": [
+        {
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.5,
+                    0.5,
+                    0.5,
+                    1.0
+                ],
+                "metallicFactor": 0.0
+            }
+        },
+        {
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.5,
+                    0.5,
+                    0.5,
+                    1.0
+                ],
+                "baseColorTexture": {
+                    "index": 0
+                },
+                "metallicFactor": 0.0
+            }
+        }
+    ],
+    "meshes": [
+        {
+            "primitives": [
+                {
+                    "attributes": {
+                        "POSITION": 0,
+                        "TEXCOORD_0": 1
+                    },
+                    "indices": 2,
+                    "material": 1
+                }
+            ]
+        }
+    ],
+    "nodes": [
+        {
+            "mesh": 0,
+            "name": "group1"
+        }
+    ],
+    "scenes": [
+        {
+            "nodes": [
+                0
+            ]
+        }
+    ],
+    "textures": [
+        {
+            "source": 0
+        }
+    ],
+    "scene": 0
+}
