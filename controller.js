@@ -154,7 +154,7 @@ async function init() {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
           controller1.gamepad = event.data.gamepad;
-          console.log(controller1.gamepad.buttons);
+          console.log(controller1.gamepad.axes);
         }
     }
   });
@@ -166,7 +166,7 @@ async function init() {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
           controller2.gamepad = event.data.gamepad;
-          console.log(controller2.gamepad.buttons);
+          console.log(controller2.gamepad.axes);
         }
     }
   });
@@ -199,35 +199,45 @@ async function init() {
       //console.log(controller2);
       if(controller1.gamepad.buttons[0].pressed == true){
         //console.log(controller1.gamepad.buttons);
-        xx = -50;
+        //xx = -50;
+        xx = controller1.gamepad.axes[0] * 100;
+        yy = controller2.gamepad.axes[0] * 100;
       }else if(controller1.gamepad.buttons[1].pressed == true){
-        xx = 50;
-      }else if(controller1.gamepad.buttons[2].pressed == true){
-        xx = 150;
-      }else if(controller1.gamepad.buttons[3].pressed == true){
-        xx = 250;
-      }else if(controller1.gamepad.buttons[4].pressed == true){
-        xx = 350;
-      }else if(controller1.gamepad.buttons[5].pressed == true){
-        xx = 450;
-      }else if(controller1.gamepad.buttons[6].pressed == true){
-        xx = 550;
+        //xx = 50;
+        xx = controller1.gamepad.axes[1] * 100;
+        yy = controller2.gamepad.axes[1] * 100;
       }
+      // }else if(controller1.gamepad.buttons[2].pressed == true){
+      //   xx = 150;
+      // }else if(controller1.gamepad.buttons[3].pressed == true){
+      //   xx = 250;
+      // }else if(controller1.gamepad.buttons[4].pressed == true){
+      //   xx = 350;
+      // }else if(controller1.gamepad.buttons[5].pressed == true){
+      //   xx = 450;
+      // }else if(controller1.gamepad.buttons[6].pressed == true){
+      //   xx = 550;
+      // }
       if(controller2.gamepad.buttons[0].pressed == true){
-        yy = 50;
+      //  yy = 50;
+        xx = controller1.gamepad.axes[2] * 100;
+        yy = controller2.gamepad.axes[2] * 100;
       }else if(controller2.gamepad.buttons[1].pressed == true){
-        yy = 75;
-      }else if(controller2.gamepad.buttons[2].pressed == true){
-        yy = 125;
-      }else if(controller2.gamepad.buttons[3].pressed == true){
-        yy = 150;
-      }else if(controller2.gamepad.buttons[4].pressed == true){
-        yy = 175;
-      }else if(controller2.gamepad.buttons[5].pressed == true){
-        yy = 200;
-      }else if(controller2.gamepad.buttons[6].pressed == true){
-        yy = 225;
+        //yy = 75;
+        xx = controller1.gamepad.axes[3] * 100;
+        yy = controller2.gamepad.axes[3] * 100;
       }
+      // }else if(controller2.gamepad.buttons[2].pressed == true){
+      //   yy = 125;
+      // }else if(controller2.gamepad.buttons[3].pressed == true){
+      //   yy = 150;
+      // }else if(controller2.gamepad.buttons[4].pressed == true){
+      //   yy = 175;
+      // }else if(controller2.gamepad.buttons[5].pressed == true){
+      //   yy = 200;
+      // }else if(controller2.gamepad.buttons[6].pressed == true){
+      //   yy = 225;
+      // }
       cube2.position.set( xx, yy, -500);
       //cameraContainer.position.x += 0.1;
       // cube.position.set(
