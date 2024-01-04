@@ -177,11 +177,10 @@ async function init() {
       case 0: // Aボタン
         console.log('A button pressed!');
         // Aボタンが押されたときの処理を追加
+        cameraContainer.position.x += 0.01;
         this.userData.isSelecting = true;
-	cameraContainer.position.x += 0.01;
         break;
       default:
-	cameraContainer.position.x -= 0.01;
         break;
     }
   });
@@ -192,7 +191,8 @@ async function init() {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
           controller1.gamepad = event.data.gamepad;
-          console.log(controller1.gamepad);
+          console.log(event.data.button);
+          //console.log(controller1.gamepad);
         }
     }
   });
@@ -208,11 +208,11 @@ async function init() {
       case 0: // Aボタン
         console.log('A button pressed!');
         // Aボタンが押されたときの処理を追加
-	cameraContainer.position.x += 0.01;
+        cameraContainer.position.x += 0.01;
         this.userData.isSelecting = true;
         break;
       default:
-	cameraContainer.position.x -= 0.01;
+        cameraContainer.position.x -= 0.01;
         break;
     }
   });
@@ -249,10 +249,13 @@ async function init() {
 	function handleController( controller ) {
 		const userData = controller.userData;
     //controller1 = controller;
-    
+    if(controller.button==0){
+      xx= 0;
+    }
 		if ( userData.isSelecting === true ) {//コントローラーボタンが押された際の処理
       
-      //console.log(controller2);
+      console.log(controller.button);
+      
       if(controller1.gamepad.buttons[0].pressed == true){
         //console.log(controller1.gamepad.buttons);
         xx = -50;
