@@ -203,7 +203,7 @@ async function init() {
         //xx = controller1.gamepad.axes[0] * 100;
         //yy = controller2.gamepad.axes[0] * 100;
       }else if(controller1.gamepad.buttons[1].pressed == true){
-        //xx = 50;
+        xx = 50;
         //xx = controller1.gamepad.axes[1] * 100;
         //yy = controller2.gamepad.axes[1] * 100;
       }else if(controller1.gamepad.buttons[2].pressed == true){
@@ -218,13 +218,13 @@ async function init() {
         xx = 550;
       }
       if(controller2.gamepad.buttons[0].pressed == true){
-      //  yy = 50;
-        xx = controller1.gamepad.axes[2] * 100;
-        yy = controller2.gamepad.axes[2] * 100;
+        yy = 50;
+      //  xx = controller1.gamepad.axes[2] * 100;
+      //  yy = controller2.gamepad.axes[2] * 100;
       }else if(controller2.gamepad.buttons[1].pressed == true){
-        //yy = 75;
-        xx = controller1.gamepad.axes[3] * 100;
-        yy = controller2.gamepad.axes[3] * 100;
+        yy = 75;
+        //xx = controller1.gamepad.axes[3] * 100;
+        //yy = controller2.gamepad.axes[3] * 100;
       
       }else if(controller2.gamepad.buttons[2].pressed == true){
         yy = 125;
