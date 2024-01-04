@@ -200,8 +200,18 @@ async function init() {
   controller2.addEventListener( 'selectend', onSelectEnd );
   controller2.addEventListener('squeezestart', onSqueezeStart);
   controller2.addEventListener('squeezeend', onSqueezeEnd);
-  controller2.addEventListener('buttondown', onButtonDown);
-  controller2.addEventListener('buttonup', onButtonUp);
+  controller2.addEventListener('buttondown', (event) => {
+    const buttonId = event.data.button; // ボタンのIDを取得
+    switch (buttonId) {
+      case 0: // Aボタン
+        console.log('A button pressed!');
+        // Aボタンが押されたときの処理を追加
+        this.userData.isSelecting = true;
+        break;
+      default:
+        break;
+    }
+  });
   controller2.addEventListener( 'connected', ( event )=> {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
