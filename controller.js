@@ -178,8 +178,10 @@ async function init() {
         console.log('A button pressed!');
         // Aボタンが押されたときの処理を追加
         this.userData.isSelecting = true;
+	cameraContainer.position.x += 0.01;
         break;
       default:
+	cameraContainer.position.x -= 0.01;
         break;
     }
   });
@@ -206,9 +208,11 @@ async function init() {
       case 0: // Aボタン
         console.log('A button pressed!');
         // Aボタンが押されたときの処理を追加
+	cameraContainer.position.x += 0.01;
         this.userData.isSelecting = true;
         break;
       default:
+	cameraContainer.position.x -= 0.01;
         break;
     }
   });
