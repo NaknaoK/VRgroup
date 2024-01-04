@@ -171,8 +171,7 @@ async function init() {
   controller1.addEventListener( 'selectend', onSelectEnd );
   controller1.addEventListener('squeezestart', onSqueezeStart);
   controller1.addEventListener('squeezeend', onSqueezeEnd);
-  controller1.addEventListener('buttondown', onAButtonDown);
-  controller1.addEventListener('buttonup', onAButtonUp);
+
   // controller1.addEventListener("connected", (e) => {
   //   console.log(e.data.gamepad)
   // })
@@ -190,6 +189,9 @@ async function init() {
   controller2.addEventListener( 'selectend', onSelectEnd );
   controller2.addEventListener('squeezestart', onSqueezeStart);
   controller2.addEventListener('squeezeend', onSqueezeEnd);
+  controller1.addEventListener('buttondown', onAButtonDown);
+  controller1.addEventListener('buttonup', onAButtonUp);
+	
   controller2.addEventListener( 'connected', ( event )=> {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
