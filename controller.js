@@ -191,13 +191,13 @@ async function init() {
   
 
   //機能
-	function handleController( controller ) {
-		const userData = controller.userData;
-    //controller1 = controller;
-		if ( userData.isSelecting == true ) {//コントローラーボタンが押された際の処理
-      let xx = 0,yy = 100;
-      //console.log(controller2);
-      if(controller1.gamepad.buttons[0].pressed == true){
+function handleController( controller ) {
+	const userData = controller.userData;
+	//controller1 = controller;
+	if ( userData.isSelecting == true ) {//コントローラーボタンが押された際の処理
+		let xx = 0,yy = 100;
+		//console.log(controller2);
+		if(controller1.gamepad.buttons[0].pressed == true){
         //console.log(controller1.gamepad.buttons);
         xx = -50;
         //xx = controller1.gamepad.axes[0] * 100;
@@ -219,13 +219,12 @@ async function init() {
       }
       if(controller2.gamepad.buttons[0].pressed == true){
         yy = 50;
-      //  xx = controller1.gamepad.axes[2] * 100;
-      //  yy = controller2.gamepad.axes[2] * 100;
+	      //xx = controller1.gamepad.axes[2] * 100;
+	      //yy = controller2.gamepad.axes[2] * 100;
       }else if(controller2.gamepad.buttons[1].pressed == true){
         yy = 75;
-        //xx = controller1.gamepad.axes[3] * 100;
-        //yy = controller2.gamepad.axes[3] * 100;
-      
+	      //xx = controller1.gamepad.axes[3] * 100;
+	      //yy = controller2.gamepad.axes[3] * 100;
       }else if(controller2.gamepad.buttons[2].pressed == true){
         yy = 125;
       }else if(controller2.gamepad.buttons[3].pressed == true){
