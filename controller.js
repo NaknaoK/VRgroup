@@ -164,26 +164,45 @@ async function init() {
   //   controller2.userData.isSelecting = false;
   //   console.log("end2");
   // }	
+  function onTriggerDown() {
+    console.log('Trigger down!');
+    // トリガーが押されている間の処理を追加
+    this.userData.isSelecting = true;
+  }
+  
+  // トリガーが離された瞬間のイベントハンドラ
+  function onTriggerUp() {
+    console.log('Trigger up!');
+    // トリガーが離されたときの処理を追加
+    this.userData.isSelecting = false;
+  }
+  function onXButtonDown(event) {
+    console.log('x button down!');
+    // Aボタンが押されたときの処理を追加
+    cameraContainer.position.x += 10;
+  }
 
   //コントローラー取得
   controller1 = renderer.xr.getController( 0 );
-  controller1.addEventListener( 'selectstart', onSelectStart);
-  controller1.addEventListener( 'selectend', onSelectEnd );
+  // controller1.addEventListener( 'selectstart', onSelectStart);
+  // controller1.addEventListener( 'selectend', onSelectEnd );
+  controller1.addEventListener('triggerdown', onTriggerDown);
+controller1.addEventListener('triggerup', onTriggerUp);
   controller1.addEventListener('squeezestart', onSqueezeStart);
   controller1.addEventListener('squeezeend', onSqueezeEnd);
-  controller1.addEventListener('inputsourceschange', (event) => {
-    cameraContainer.position.x += 0.01;
-　　const buttonId = event.data.button; // ボタンのIDを取得
-    switch (buttonId) {
-      case 0: // Aボタン
-        console.log('A button pressed!');
-        // Aボタンが押されたときの処理を追加
-        this.userData.isSelecting = true;
-        break;
-      default:
-        break;
-    }
-  });
+  // controller1.addEventListener('inputsourceschange', (event) => {
+  //   const buttonId = event.data.button; // ボタンのIDを取得
+  //   switch (buttonId) {
+  //     case 0: // Aボタン
+  //       console.log('A button pressed!');
+  //       // Aボタンが押されたときの処理を追加
+  //       cameraContainer.position.x += 0.01;
+  //       this.userData.isSelecting = true;
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // });
   // controller1.addEventListener("connected", (e) => {
   //   console.log(e.data.gamepad)
   // })
@@ -196,6 +215,7 @@ async function init() {
         }
     }
   });
+  controller1.addEventListener('buttondown', onXButtonDown);
   scene.add( controller1 );
   controller2 = renderer.xr.getController( 1 );
   controller2.addEventListener( 'selectstart', onSelectStart );
