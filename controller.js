@@ -189,8 +189,8 @@ async function init() {
   controller2.addEventListener( 'selectend', onSelectEnd );
   controller2.addEventListener('squeezestart', onSqueezeStart);
   controller2.addEventListener('squeezeend', onSqueezeEnd);
-  controller1.addEventListener('buttondown', onAButtonDown);
-  controller1.addEventListener('buttonup', onAButtonUp);
+  controller2.addEventListener('buttondown', onAButtonDown);
+  controller2.addEventListener('buttonup', onAButtonUp);
 	
   controller2.addEventListener( 'connected', ( event )=> {
     if('gamepad' in event.data){
