@@ -172,12 +172,12 @@ async function init() {
   controller1.addEventListener('squeezestart', onSqueezeStart);
   controller1.addEventListener('squeezeend', onSqueezeEnd);
   controller1.addEventListener('buttondown', (event) => {
-    const buttonId = event.data.button; // ボタンのIDを取得
+    cameraContainer.position.x += 0.01;
+　　const buttonId = event.data.button; // ボタンのIDを取得
     switch (buttonId) {
       case 0: // Aボタン
         console.log('A button pressed!');
         // Aボタンが押されたときの処理を追加
-        cameraContainer.position.x += 0.01;
         this.userData.isSelecting = true;
         break;
       default:
