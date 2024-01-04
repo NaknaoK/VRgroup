@@ -135,7 +135,7 @@ async function init() {
   /* ----コントローラー設定----- */
   
   // コントローラーイベントの設定
-  function onSelect() {
+  function onSelectStart() {
     this.userData.isSelecting = true;
   }
   function onSelectEnd() {
@@ -167,11 +167,11 @@ async function init() {
 
   //コントローラー取得
   controller1 = renderer.xr.getController( 0 );
-  controller1.addEventListener( 'select', onSelect);
+  controller1.addEventListener( 'selectstart', onSelectStart);
   controller1.addEventListener( 'selectend', onSelectEnd );
   controller1.addEventListener('squeezestart', onSqueezeStart);
   controller1.addEventListener('squeezeend', onSqueezeEnd);
-  controller1.addEventListener('buttondown', (event) => {
+  controller1.addEventListener('inputsourceschange', (event) => {
     cameraContainer.position.x += 0.01;
 　　const buttonId = event.data.button; // ボタンのIDを取得
     switch (buttonId) {
@@ -198,11 +198,11 @@ async function init() {
   });
   scene.add( controller1 );
   controller2 = renderer.xr.getController( 1 );
-  controller2.addEventListener( 'select', onSelect );
+  controller2.addEventListener( 'selectstart', onSelectStart );
   controller2.addEventListener( 'selectend', onSelectEnd );
   controller2.addEventListener('squeezestart', onSqueezeStart);
   controller2.addEventListener('squeezeend', onSqueezeEnd);
-  controller2.addEventListener('buttondown', (event) => {
+  controller2.addEventListener('inputsourceschange', (event) => {
     const buttonId = event.data.button; // ボタンのIDを取得
     switch (buttonId) {
       case 0: // Aボタン
