@@ -139,14 +139,40 @@ async function init() {
     this.userData.isSelecting = true;
   }
   function onSelectEnd() {
+    this.userData.isSelecting = false;
+  }
+  function onAButtonDown() {
     this.userData.isSelecting = true;
-  }	
+    // Aボタンが押されたときの処理を追加
+  }
+  
+  function onAButtonUp() {
+    this.userData.isSelecting = false;
+    // Aボタンが離されたときの処理を追加
+  }
+  function onSqueezeStart(){
+    this.userData.isSelecting = true;
+  }
+  function onSqueezeEnd(){
+    this.userData.isSelecting = false;
+  }
+  // function onSelectStart() {
+  //   controller2.userData.isSelecting = true;
+  //   console.log(controller2);
+  // }
+  // function onSelectEnd() {
+  //   controller2.userData.isSelecting = false;
+  //   console.log("end2");
+  // }	
 
   //コントローラー取得
   controller1 = renderer.xr.getController( 0 );
-  //controller1.addEventListener( 'selectstart', ( event )=> {onSelectStart(event) });
   controller1.addEventListener( 'selectstart', onSelectStart);
   controller1.addEventListener( 'selectend', onSelectEnd );
+  controller1.addEventListener('squeezestart', onSqueezeStart);
+  controller1.addEventListener('squeezeend', onSqueezeEnd);
+  controller1.addEventListener('buttondown', onAButtonDown);
+  controller1.addEventListener('buttonup', onAButtonUp);
   // controller1.addEventListener("connected", (e) => {
   //   console.log(e.data.gamepad)
   // })
@@ -154,7 +180,7 @@ async function init() {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
           controller1.gamepad = event.data.gamepad;
-          console.log(controller1.gamepad.axes);
+          console.log(controller1.gamepad);
         }
     }
   });
@@ -162,11 +188,13 @@ async function init() {
   controller2 = renderer.xr.getController( 1 );
   controller2.addEventListener( 'selectstart', onSelectStart );
   controller2.addEventListener( 'selectend', onSelectEnd );
+  controller2.addEventListener('squeezestart', onSqueezeStart);
+  controller2.addEventListener('squeezeend', onSqueezeEnd);
   controller2.addEventListener( 'connected', ( event )=> {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
           controller2.gamepad = event.data.gamepad;
-          console.log(controller2.gamepad.axes);
+          console.log(controller2);
         }
     }
   });
@@ -190,22 +218,27 @@ async function init() {
   controller2.add( line.clone() );
   
 
+  let xx = 0,yy = 100;
   //機能
-function handleController( controller ) {
-	const userData = controller.userData;
-	//controller1 = controller;
-	if ( userData.isSelecting == true ) {//コントローラーボタンが押された際の処理
-		let xx = 0,yy = 100;
-		//console.log(controller2);
-		if(controller1.gamepad.buttons[0].pressed == true){
+	function handleController( controller ) {
+		const userData = controller.userData;
+    //controller1 = controller;
+    
+		if ( userData.isSelecting === true ) {//コントローラーボタンが押された際の処理
+      
+      //console.log(controller2);
+      if(controller1.gamepad.buttons[0].pressed == true){
         //console.log(controller1.gamepad.buttons);
         xx = -50;
-        //xx = controller1.gamepad.axes[0] * 100;
-        //yy = controller2.gamepad.axes[0] * 100;
+        // xx = controller1.gamepad.axes[0] * 100;
+        // yy = controller2.gamepad.axes[0] * 100;
+        //console.log(1);
       }else if(controller1.gamepad.buttons[1].pressed == true){
         xx = 50;
-        //xx = controller1.gamepad.axes[1] * 100;
-        //yy = controller2.gamepad.axes[1] * 100;
+        // xx = controller1.gamepad.axes[1] * 100;
+        // yy = controller2.gamepad.axes[1] * 100;
+        //console.log(2);
+      //}
       }else if(controller1.gamepad.buttons[2].pressed == true){
         xx = 150;
       }else if(controller1.gamepad.buttons[3].pressed == true){
@@ -219,12 +252,15 @@ function handleController( controller ) {
       }
       if(controller2.gamepad.buttons[0].pressed == true){
         yy = 50;
-	      //xx = controller1.gamepad.axes[2] * 100;
-	      //yy = controller2.gamepad.axes[2] * 100;
+        // xx = controller1.gamepad.axes[2] * 100;
+        // yy = controller2.gamepad.axes[2] * 100;
+        //console.log(3);
       }else if(controller2.gamepad.buttons[1].pressed == true){
         yy = 75;
-	      //xx = controller1.gamepad.axes[3] * 100;
-	      //yy = controller2.gamepad.axes[3] * 100;
+        // xx = controller1.gamepad.axes[3] * 100;
+        // yy = controller2.gamepad.axes[3] * 100;
+        //console.log(4);
+      //}
       }else if(controller2.gamepad.buttons[2].pressed == true){
         yy = 125;
       }else if(controller2.gamepad.buttons[3].pressed == true){
@@ -236,7 +272,7 @@ function handleController( controller ) {
       }else if(controller2.gamepad.buttons[6].pressed == true){
         yy = 225;
       }
-      cube2.position.set( xx, yy, -500);
+      
       //cameraContainer.position.x += 0.1;
       // cube.position.set(
       //   Math.random() * -1000 - 300,  // x座標を-5から5の範囲でランダムに設定
@@ -245,8 +281,9 @@ function handleController( controller ) {
       // );
       // scene.add(cube);
 		} else {
-      
+
 		}
+    cube2.position.set( xx, yy, -500);
 	}
   /* ----コントローラー設定----- */
   
