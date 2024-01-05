@@ -137,6 +137,9 @@ async function init() {
   // コントローラーイベントの設定
   function onSelectStart() {
     this.userData.isSelecting = true;
+    console.log(controller1);
+    //console.log(camera.rotation);
+    // console.log(this._listeners['buttondown'].indexOf( onButtonDown ));
   }
   function onSelectEnd() {
     this.userData.isSelecting = false;
@@ -184,13 +187,14 @@ async function init() {
 
   //コントローラー取得
   controller1 = renderer.xr.getController( 0 );
-  // controller1.addEventListener( 'selectstart', onSelectStart);
-  // controller1.addEventListener( 'selectend', onSelectEnd );
-  controller1.addEventListener('triggerdown', onTriggerDown);
-controller1.addEventListener('triggerup', onTriggerUp);
+  controller1.addEventListener( 'selectstart', onSelectStart);
+  controller1.addEventListener( 'selectend', onSelectEnd );
+  // controller1.addEventListener('triggerdown', onTriggerDown);
+  // controller1.addEventListener('triggerup', onTriggerUp);
   controller1.addEventListener('squeezestart', onSqueezeStart);
   controller1.addEventListener('squeezeend', onSqueezeEnd);
-  // controller1.addEventListener('inputsourceschange', (event) => {
+  //controller1.addEventListener('buttondown', (e) =>{e});
+  // controller1.addEventListener('buttondown', (event) => {
   //   const buttonId = event.data.button; // ボタンのIDを取得
   //   switch (buttonId) {
   //     case 0: // Aボタン
@@ -206,6 +210,11 @@ controller1.addEventListener('triggerup', onTriggerUp);
   // controller1.addEventListener("connected", (e) => {
   //   console.log(e.data.gamepad)
   // })
+  controller1.addEventListener('axischanged', (event) => {
+    // サムスティックの変更があったときの処理
+    this.userData.isSelecting = true;
+    // ここでサムスティックの値に基づいた処理を実装
+  });
   controller1.addEventListener( 'connected', ( event )=> {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
@@ -222,20 +231,20 @@ controller1.addEventListener('triggerup', onTriggerUp);
   controller2.addEventListener( 'selectend', onSelectEnd );
   controller2.addEventListener('squeezestart', onSqueezeStart);
   controller2.addEventListener('squeezeend', onSqueezeEnd);
-  controller2.addEventListener('inputsourceschange', (event) => {
-    const buttonId = event.data.button; // ボタンのIDを取得
-    switch (buttonId) {
-      case 0: // Aボタン
-        console.log('A button pressed!');
-        // Aボタンが押されたときの処理を追加
-        cameraContainer.position.x += 0.01;
-        this.userData.isSelecting = true;
-        break;
-      default:
-        cameraContainer.position.x -= 0.01;
-        break;
-    }
-  });
+  // controller2.addEventListener('inputsourceschange', (event) => {
+  //   const buttonId = event.data.button; // ボタンのIDを取得
+  //   switch (buttonId) {
+  //     case 0: // Aボタン
+  //       console.log('A button pressed!');
+  //       // Aボタンが押されたときの処理を追加
+  //       cameraContainer.position.x += 0.01;
+  //       this.userData.isSelecting = true;
+  //       break;
+  //     default:
+  //       cameraContainer.position.x -= 0.01;
+  //       break;
+  //   }
+  // });
   controller2.addEventListener( 'connected', ( event )=> {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
@@ -284,7 +293,7 @@ controller1.addEventListener('triggerup', onTriggerUp);
         //console.log(1);
       }else if(controller1.gamepad.buttons[1].pressed == true){
         xx = 50;
-        // xx = controller1.gamepad.axes[1] * 100;
+        xx = controller1.gamepad.axes[1] * 100;
         // yy = controller2.gamepad.axes[1] * 100;
         //console.log(2);
       //}
@@ -321,7 +330,12 @@ controller1.addEventListener('triggerup', onTriggerUp);
       }else if(controller2.gamepad.buttons[6].pressed == true){
         yy = 225;
       }
-      
+      if(controller1.gamepad.axes[2] != 0){
+        cameraContainer.position.x += 0.1;
+      }
+      if(controller1.gamepad.axes[3] != 0){
+        cameraContainer.position.y += 0.1;
+      }
       //cameraContainer.position.x += 0.1;
       // cube.position.set(
       //   Math.random() * -1000 - 300,  // x座標を-5から5の範囲でランダムに設定
