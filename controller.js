@@ -210,7 +210,7 @@ async function init() {
   // controller1.addEventListener("connected", (e) => {
   //   console.log(e.data.gamepad)
   // })
-  controller1.addEventListener('gamepadconnected', (event) => {
+  controller1.addEventListener('thumbstickmoved', (event) => {
     // サムスティックの変更があったときの処理
     this.userData.isSelecting = true;
     // ここでサムスティックの値に基づいた処理を実装
