@@ -144,7 +144,7 @@ async function init() {
   function onSelectEnd() {
     this.userData.isSelecting = false;
   }
-  function onButtonDown() {
+  function onStick() {
     this.userData.isSelecting = true;
     // Aボタンが押されたときの処理を追加
   }
@@ -210,11 +210,7 @@ async function init() {
   // controller1.addEventListener("connected", (e) => {
   //   console.log(e.data.gamepad)
   // })
-  controller1.addEventListener('axischanged', (event) => {
-    // サムスティックの変更があったときの処理
-    this.userData.isSelecting = true;
-    // ここでサムスティックの値に基づいた処理を実装
-  });
+  controller1.addEventListener('axischanged', onStick());
   controller1.addEventListener( 'connected', ( event )=> {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
