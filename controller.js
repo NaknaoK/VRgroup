@@ -213,10 +213,8 @@ async function init() {
   controller1.addEventListener('gamepadconnected', (event) => {
     const gamepad = event.gamepad;
     // サムスティックの変更があったときの処理
-    if (gamepad.id.includes('Oculus Quest 2')){
-      this.userData.isSelecting = true;
-      cameraContainer.position.x -= 0.1;
-    }
+    controller1.userData.isSelecting = true;
+    cameraContainer.position.x -= 0.1;
     // ここでサムスティックの値に基づいた処理を実装
   });
   controller1.addEventListener( 'connected', ( event )=> {
