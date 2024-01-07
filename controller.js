@@ -52,12 +52,13 @@ async function init() {
   // カメラ用コンテナを作成(3Dのカメラを箱に入れて箱自体を動かす) 
   const cameraContainer = new THREE.Object3D();
   cameraContainer.add(camera);
-  cameraContainer.add(controller1);
-  cameraContainer.add(controller2);
+  camera.add(controller1);
+  camera.add(controller2);
   scene.add(cameraContainer);
   
   //コントローラーのステック操作の閾値
   const threshold = 0.1;
+  let VRconnect = false;
 
   // 光源を作成
   {
@@ -192,6 +193,7 @@ async function init() {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
           controller1.gamepad = event.data.gamepad;
+          VRconnect = true;
           console.log(controller1);
           //console.log(controller1.gamepad);
         }
@@ -306,10 +308,10 @@ async function init() {
       // );
       // scene.add(cube);
 		} else {
-      if(Math.abs(controller1.gamepad.axes[2]) >= threshold ){
+      if(controller1.gamepad.axes[2] >= threshold || controller1.gamepad.axes[2] <= 0-threshold){
         cameraContainer.position.x += controllerData.axes[2];
       }
-      if(Math.abs(controller1.gamepad.axes[3]) >= threshold ){
+      if(controller1.gamepad.axes[3] >= threshold || controller1.gamepad.axes[3] <= 0-threshold){
         cameraContainer.position.z += controllerData.axes[3];
       }
 		}
@@ -350,8 +352,10 @@ async function init() {
 
 
     // レンダリング
-    handleController( controller1 );
-		handleController( controller2 );
+    if(VRconnect){
+      handleController( controller1 );
+      handleController( controller2 );
+    }
     renderer.render(scene, camera);
   }
 
