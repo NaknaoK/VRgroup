@@ -51,9 +51,9 @@ async function init() {
   
   // カメラ用コンテナを作成(3Dのカメラを箱に入れて箱自体を動かす) 
   const cameraContainer = new THREE.Object3D();
+  camera.add(controller1);
+  camera.add(controller2);
   cameraContainer.add(camera);
-  camera.add(controllerGrip1);
-  camera.add(controllerGrip2);
   scene.add(cameraContainer);
   
   //コントローラーのステック操作の閾値
