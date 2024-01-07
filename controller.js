@@ -52,8 +52,13 @@ async function init() {
   // カメラ用コンテナを作成(3Dのカメラを箱に入れて箱自体を動かす) 
   const cameraContainer = new THREE.Object3D();
   cameraContainer.add(camera);
+  cameraContainer.add(controller1);
+  cameraContainer.add(controller2);
   scene.add(cameraContainer);
   
+  //コントローラーのステック操作の閾値
+  const threshold = 0.1;
+
   // 光源を作成
   {
     // const spotLight = new THREE.SpotLight(
@@ -144,45 +149,11 @@ async function init() {
   function onSelectEnd() {
     this.userData.isSelecting = false;
   }
-  function onStick() {
-    this.userData.isSelecting = true;
-    // Aボタンが押されたときの処理を追加
-  }
-  
-  function onButtonUp() {
-    this.userData.isSelecting = false;
-    // Aボタンが離されたときの処理を追加
-  }
   function onSqueezeStart(){
     this.userData.isSelecting = true;
   }
   function onSqueezeEnd(){
     this.userData.isSelecting = false;
-  }
-  // function onSelectStart() {
-  //   controller2.userData.isSelecting = true;
-  //   console.log(controller2);
-  // }
-  // function onSelectEnd() {
-  //   controller2.userData.isSelecting = false;
-  //   console.log("end2");
-  // }	
-  function onTriggerDown() {
-    console.log('Trigger down!');
-    // トリガーが押されている間の処理を追加
-    this.userData.isSelecting = true;
-  }
-  
-  // トリガーが離された瞬間のイベントハンドラ
-  function onTriggerUp() {
-    console.log('Trigger up!');
-    // トリガーが離されたときの処理を追加
-    this.userData.isSelecting = false;
-  }
-  function onXButtonDown(event) {
-    console.log('x button down!');
-    // Aボタンが押されたときの処理を追加
-    cameraContainer.position.x += 10;
   }
 
   //コントローラー取得
@@ -221,12 +192,11 @@ async function init() {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
           controller1.gamepad = event.data.gamepad;
-          console.log(event.data.button);
+          console.log(controller1);
           //console.log(controller1.gamepad);
         }
     }
   });
-  controller1.addEventListener('buttondown', onXButtonDown);
   scene.add( controller1 );
   controller2 = renderer.xr.getController( 1 );
   controller2.addEventListener( 'selectstart', onSelectStart );
@@ -251,7 +221,7 @@ async function init() {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
           controller2.gamepad = event.data.gamepad;
-          console.log(controller2);
+          console.log(event.data.gamepad);
         }
     }
   });
@@ -279,23 +249,18 @@ async function init() {
   //機能
 	function handleController( controller ) {
 		const userData = controller.userData;
+    const controllerData = controller.gamepad;
     //controller1 = controller;
-    if(controller.button==0){
-      xx= 0;
-    }
 		if ( userData.isSelecting === true ) {//コントローラーボタンが押された際の処理
       
-      console.log(controller.button);
+      console.log(userData);
       
       if(controller1.gamepad.buttons[0].pressed == true){
-        //console.log(controller1.gamepad.buttons);
-        xx = -50;
-        // xx = controller1.gamepad.axes[0] * 100;
-        // yy = controller2.gamepad.axes[0] * 100;
-        //console.log(1);
+        cameraContainer.position.y += controller1.gamepad.buttons[0].value;
       }else if(controller1.gamepad.buttons[1].pressed == true){
+        cameraContainer.position.y -= controller1.gamepad.buttons[1].value;
         xx = 50;
-        xx = controller1.gamepad.axes[1] * 100;
+        //xx = controller1.gamepad.axes[1] * 100;
         // yy = controller2.gamepad.axes[1] * 100;
         //console.log(2);
       //}
@@ -332,12 +297,7 @@ async function init() {
       }else if(controller2.gamepad.buttons[6].pressed == true){
         yy = 225;
       }
-      if(controller1.gamepad.axes[2] != 0){
-        cameraContainer.position.x += 0.1;
-      }
-      if(controller1.gamepad.axes[3] != 0){
-        cameraContainer.position.y += 0.1;
-      }
+      
       //cameraContainer.position.x += 0.1;
       // cube.position.set(
       //   Math.random() * -1000 - 300,  // x座標を-5から5の範囲でランダムに設定
@@ -346,8 +306,15 @@ async function init() {
       // );
       // scene.add(cube);
 		} else {
-
+      if(Math.abs(controller1.gamepad.axes[2]) >= threshold ){
+        cameraContainer.position.x += controllerData.axes[2];
+      }
+      if(Math.abs(controller1.gamepad.axes[3]) >= threshold ){
+        cameraContainer.position.z += controllerData.axes[3];
+      }
 		}
+
+    
     cube2.position.set( xx, yy, -500);
 	}
   /* ----コントローラー設定----- */
