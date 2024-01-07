@@ -237,7 +237,7 @@ async function init() {
   cameraContainer.add( controllerGrip1 );
   controllerGrip2 = renderer.xr.getControllerGrip(1);
   controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
-  controller2.add( controllerGrip2 );
+  cameraContainer.add( controllerGrip2 );
   //コントローラーから出る光線の作成				
   const geo = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 )]);
   const mat = new THREE.LineBasicMaterial({color: 0xff0000});
@@ -309,12 +309,14 @@ async function init() {
       // );
       // scene.add(cube);
 		} else {
-      if(controller1.gamepad.axes[2] >= threshold || controller1.gamepad.axes[2] <= 0-threshold){
-        cameraContainer.position.x += controllerData.axes[2];
-      }
-      if(controller1.gamepad.axes[3] >= threshold || controller1.gamepad.axes[3] <= 0-threshold){
-        cameraContainer.position.z += controllerData.axes[3];
-      }
+      // if(controller1.gamepad.axes[2] > 0 || controller1.gamepad.axes[2] < 0){
+      //   cameraContainer.position.x += controllerData.axes[2];
+      // }
+      // if(controller1.gamepad.axes[3] >= threshold || controller1.gamepad.axes[3] <= 0-threshold){
+      //   cameraContainer.position.z += controllerData.axes[3];
+      // }
+      cameraContainer.position.x += Math.cos(90*(camera.rotation.y/1.56))*controllerData.axes[2];
+      cameraContainer.position.z += Math.sin(90*(camera.rotation.y/1.56))*controllerData.axes[3];
 		}
 
     
