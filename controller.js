@@ -234,7 +234,7 @@ async function init() {
   const controllerModelFactory = new XRControllerModelFactory();
   controllerGrip1 = renderer.xr.getControllerGrip(0);
   controllerGrip1.add( controllerModelFactory.createControllerModel( controllerGrip1 ) );
-  controller1.add( controllerGrip1 );
+  cameraContainer.add( controllerGrip1 );
   controllerGrip2 = renderer.xr.getControllerGrip(1);
   controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
   controller2.add( controllerGrip2 );
