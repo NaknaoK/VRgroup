@@ -9,7 +9,7 @@ import { XRControllerModelFactory } from 'https://unpkg.com/three@0.150.1/exampl
 //PC上で滑らかにカメラコントローラーを制御する為に使用↓
 import { OrbitControls } from 'https://unpkg.com/three@0.150.1/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-var controller1, controller2;
+let controller1, controller2;
 let controllerGrip1, controllerGrip2;
 
 /* ----Map関係---- */
@@ -51,9 +51,9 @@ async function init() {
   
   // カメラ用コンテナを作成(3Dのカメラを箱に入れて箱自体を動かす) 
   const cameraContainer = new THREE.Object3D();
-  camera.add(controller1);
-  camera.add(controller2);
   cameraContainer.add(camera);
+  // cameraContainer.add(controller1);
+  // cameraContainer.add(controller2);
   scene.add(cameraContainer);
   
   //コントローラーのステック操作の閾値
@@ -199,7 +199,8 @@ async function init() {
         }
     }
   });
-  scene.add( controller1 );
+  cameraContainer.add(controller1);
+  //scene.add( controller1 );
   controller2 = renderer.xr.getController( 1 );
   controller2.addEventListener( 'selectstart', onSelectStart );
   controller2.addEventListener( 'selectend', onSelectEnd );
@@ -227,8 +228,8 @@ async function init() {
         }
     }
   });
-  scene.add( controller2 );
-
+  // scene.add( controller2 );
+  cameraContainer.add(controller2);
   //コントローラーモデルを取得
   const controllerModelFactory = new XRControllerModelFactory();
   controllerGrip1 = renderer.xr.getControllerGrip(0);
