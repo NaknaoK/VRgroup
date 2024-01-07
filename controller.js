@@ -315,7 +315,7 @@ async function init() {
       // if(controller1.gamepad.axes[3] >= threshold || controller1.gamepad.axes[3] <= 0-threshold){
       //   cameraContainer.position.z += controllerData.axes[3];
       // }
-      cameraContainer.position.x += Math.cos(Math.PI*(camera.rotation.y/1.56))*controllerData.axes[2];
+      cameraContainer.position.x += Math.cos(Math.PI*(camera.rotation.y/1.56+0.5))*controllerData.axes[2];
       cameraContainer.position.z += Math.sin(Math.PI*(camera.rotation.y/1.56))*controllerData.axes[3];
 		}
 
