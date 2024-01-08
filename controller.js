@@ -35,8 +35,8 @@ async function init() {
   });
   renderer.setSize(width, height);
   
-  console.log(renderer);
-  console.log("kakakakkakakaka");
+  // console.log(renderer);
+  // console.log("kakakakkakakaka");
   renderer.xr.enabled = true;// レンダラーのXRを有効化
   document.body.appendChild(renderer.domElement);
   // WebVRの開始ボタンをDOMに追加
@@ -122,7 +122,7 @@ async function init() {
   }
   // 立方体の作成
   const cube = createCube();
-  console.log(d);
+  //console.log(d);
   cube.position.set( 0, 100, -500);
   const cube2 = cube;
   scene.add(cube2);
@@ -134,7 +134,7 @@ async function init() {
     for(var i=0;i<tmp.length;++i){
       data[i] = tmp[i].split(',');
     }
-    console.log(data[1][4]);
+    //console.log(data[1][4]);
     //return result; //result[1][4]の値を返す
   }
   /* ----CSV関係---- */
@@ -146,7 +146,7 @@ async function init() {
   // コントローラーイベントの設定
   function onSelectStart() {
     this.userData.isSelecting = true;
-    console.log(controller1);
+    //console.log(controller1);
     //console.log(camera.rotation);
     // console.log(this._listeners['buttondown'].indexOf( onButtonDown ));
   }
@@ -197,7 +197,7 @@ async function init() {
         if('axes' in event.data.gamepad){ //we have a modern controller
           controller1.gamepad = event.data.gamepad;
           VRconnect = true;
-          console.log(controller1);
+          //console.log(controller1);
           //console.log(controller1.gamepad);
         }
     }
@@ -227,7 +227,7 @@ async function init() {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
           controller2.gamepad = event.data.gamepad;
-          console.log(event.data.gamepad);
+          //console.log(event.data.gamepad);
         }
     }
   });
@@ -253,56 +253,35 @@ async function init() {
 
   let xx = 0,yy = 100;
   //機能
-	function handleController( controller ) {
+	function handleController1( controller ) {
 		const userData = controller.userData;
     const controllerData = controller.gamepad;
     //controller1 = controller;
 		if ( userData.isSelecting === true ) {//コントローラーボタンが押された際の処理
       
-      console.log(userData);
+      //console.log(Math.abs(-90.0));
       
-      if(controller1.gamepad.buttons[0].pressed == true){
-        cameraContainer.position.y += controller1.gamepad.buttons[0].value;
-      }else if(controller1.gamepad.buttons[1].pressed == true){
-        cameraContainer.position.y -= controller1.gamepad.buttons[1].value;
+      if(controllerData.buttons[0].pressed == true){
+        cameraContainer.position.y += controllerData.buttons[0].value;
+      }else if(controllerData.buttons[1].pressed == true){
+        cameraContainer.position.y -= controllerData.buttons[1].value;
         xx = 50;
         //xx = controller1.gamepad.axes[1] * 100;
         // yy = controller2.gamepad.axes[1] * 100;
         //console.log(2);
       //}
-      }else if(controller1.gamepad.buttons[2].pressed == true){
+      }else if(controllerData.buttons[2].pressed == true){
         xx = 150;
-      }else if(controller1.gamepad.buttons[3].pressed == true){
+      }else if(controllerData.buttons[3].pressed == true){
         xx = 250;
-      }else if(controller1.gamepad.buttons[4].pressed == true){
+      }else if(controllerData.buttons[4].pressed == true){
         xx = 350;
-      }else if(controller1.gamepad.buttons[5].pressed == true){
+      }else if(controllerData.buttons[5].pressed == true){
         xx = 450;
-      }else if(controller1.gamepad.buttons[6].pressed == true){
+      }else if(controllerData.buttons[6].pressed == true){
         xx = 550;
       }
-      if(controller2.gamepad.buttons[0].pressed == true){
-        yy = 50;
-        // xx = controller1.gamepad.axes[2] * 100;
-        // yy = controller2.gamepad.axes[2] * 100;
-        //console.log(3);
-      }else if(controller2.gamepad.buttons[1].pressed == true){
-        yy = 75;
-        // xx = controller1.gamepad.axes[3] * 100;
-        // yy = controller2.gamepad.axes[3] * 100;
-        //console.log(4);
-      //}
-      }else if(controller2.gamepad.buttons[2].pressed == true){
-        yy = 125;
-      }else if(controller2.gamepad.buttons[3].pressed == true){
-        yy = 150;
-      }else if(controller2.gamepad.buttons[4].pressed == true){
-        yy = 175;
-      }else if(controller2.gamepad.buttons[5].pressed == true){
-        yy = 200;
-      }else if(controller2.gamepad.buttons[6].pressed == true){
-        yy = 225;
-      }
+      
       
       //cameraContainer.position.x += 0.1;
       // cube.position.set(
@@ -324,10 +303,12 @@ async function init() {
       // }else{//前面を見てる
 
       // }
-      const bugRotat = Math.abs(camera.rotation.x)+Math.abs(camera.rotation.z);
       const cameraRotation = camera.rotation;
+      const bugRotat = (Math.abs(cameraRotation.x)+Math.abs(cameraRotation.z));
       let speed = (Math.abs(controllerData.axes[2])+Math.abs(controllerData.axes[3]))/2;
-      if(speed > 1){speed = 1;}
+      // if(speed > 1){
+      //   speed = 1;
+      // }
       if(bugRotat > 3){
         speed *= -1;
       }
@@ -339,6 +320,32 @@ async function init() {
     
     cube2.position.set( xx, yy, -500);
 	}
+
+  function handleController2( controller ) {
+    const controllerData = controller.gamepad;
+    if(controllerData.buttons[0].pressed == true){
+      yy = 50;
+      // xx = controller1.gamepad.axes[2] * 100;
+      // yy = controller2.gamepad.axes[2] * 100;
+      //console.log(3);
+    }else if(controllerData.buttons[1].pressed == true){
+      yy = 75;
+      // xx = controller1.gamepad.axes[3] * 100;
+      // yy = controller2.gamepad.axes[3] * 100;
+      //console.log(4);
+    //}
+    }else if(controllerData.buttons[2].pressed == true){
+      yy = 125;
+    }else if(controllerData.buttons[3].pressed == true){
+      yy = 150;
+    }else if(controllerData.buttons[4].pressed == true){
+      yy = 175;
+    }else if(controllerData.buttons[5].pressed == true){
+      yy = 200;
+    }else if(controllerData.buttons[6].pressed == true){
+      yy = 225;
+    }
+  }
   // 移動関数
     function move(orientation , speed) {
       const direction = new THREE.Vector3(controller1.gamepad.axes[2], 0, controller1.gamepad.axes[3]);
@@ -379,8 +386,8 @@ async function init() {
 
     // レンダリング
     if(VRconnect){
-      handleController( controller1 );
-      handleController( controller2 );
+      handleController1( controller1 );
+      handleController2( controller2 );
     }
     renderer.render(scene, camera);
   }
