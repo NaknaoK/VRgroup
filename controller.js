@@ -326,6 +326,7 @@ async function init() {
       // }
       const cameraRotation = camera.rotation;
       const speed = (Math.abs(controllerData.axes[2])+Math.abs(controllerData.axes[3]))/2;
+      if(speed > 1){speed = 1;}
       move(cameraRotation , speed);
       //cameraContainer.position.x += Math.cos(Math.PI*(camera.rotation.y/1.5))*controllerData.axes[2];
       //cameraContainer.position.z += Math.sin(Math.PI*(camera.rotation.y/1.5))*controllerData.axes[3];
