@@ -348,7 +348,7 @@ async function init() {
   }
   // 移動関数
     function move(orientation , speed) {
-      const direction = new THREE.Vector3(controller1.gamepad.axes[2], 0, controller1.gamepad.axes[3]);
+      const direction = new THREE.Vector3(1, 0, 1);
       direction.applyQuaternion(new THREE.Quaternion(0, orientation.y, 0));
       cameraContainer.position.addScaledVector(direction, speed);
     }
