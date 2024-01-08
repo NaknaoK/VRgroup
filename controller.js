@@ -315,13 +315,28 @@ async function init() {
       // if(controller1.gamepad.axes[3] >= threshold || controller1.gamepad.axes[3] <= 0-threshold){
       //   cameraContainer.position.z += controllerData.axes[3];
       // }
-      cameraContainer.position.x += Math.cos(Math.PI*(camera.rotation.y/1.56+0.5))*controllerData.axes[2];
-      cameraContainer.position.z += Math.sin(Math.PI*(camera.rotation.y/1.56))*controllerData.axes[3];
+      //const speed = Math.abs(controllerData.axes[2])+Math.abs(controllerData.axes[3]);
+      // if(camera.rotation.y < 0){
+
+      // }else{//前面を見てる
+
+      // }
+      const cameraRotation = camera.rotation;
+      const speed = (Math.abs(controllerData.axes[2])+Math.abs(controllerData.axes[3]))/2;
+      move(cameraRotation , speed);
+      //cameraContainer.position.x += Math.cos(Math.PI*(camera.rotation.y/1.5))*controllerData.axes[2];
+      //cameraContainer.position.z += Math.sin(Math.PI*(camera.rotation.y/1.5))*controllerData.axes[3];
 		}
 
     
     cube2.position.set( xx, yy, -500);
 	}
+  // 移動関数
+    function move(orientation , speed) {
+      const direction = new THREE.Vector3(controller1.gamepad.axes[2], 0, controller1.gamepad.axes[3]);
+      direction.applyQuaternion(new THREE.Quaternion(orientation.x, orientation.y, orientation.z));
+      cameraContainer.position.addScaledVector(direction, speed);
+    }
   /* ----コントローラー設定----- */
   
 
