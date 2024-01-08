@@ -309,9 +309,9 @@ async function init() {
       // if(speed > 1){
       //   speed = 1;
       // }
-      // if(bugRotat > 3){
-      //   speed *= -1;
-      // }
+      if(bugRotat > 3){
+        speed *= -1;
+      }
       move(cameraRotation , speed);
       //cameraContainer.position.x += Math.cos(Math.PI*(camera.rotation.y/1.5))*controllerData.axes[2];
       //cameraContainer.position.z += Math.sin(Math.PI*(camera.rotation.y/1.5))*controllerData.axes[3];
