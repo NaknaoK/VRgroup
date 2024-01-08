@@ -303,14 +303,15 @@ async function init() {
       // }else{//前面を見てる
 
       // }
-      const cameraRotation = camera.rotation;
+      let cameraRotation = camera.rotation;
       const bugRotat = (Math.abs(cameraRotation.x)+Math.abs(cameraRotation.z));
       let speed = (Math.abs(controllerData.axes[2])+Math.abs(controllerData.axes[3]))/2;
       // if(speed > 1){
       //   speed = 1;
       // }
       if(bugRotat > 3){
-        speed *= -1;
+        // speed *= -1;
+        cameraRotation.y *= -1;
       }
       move(cameraRotation , speed);
       //cameraContainer.position.x += Math.cos(Math.PI*(camera.rotation.y/1.5))*controllerData.axes[2];
@@ -348,7 +349,7 @@ async function init() {
   }
   // 移動関数
     function move(orientation , speed) {
-      const direction = new THREE.Vector3(1, 0, 1);
+      const direction = new THREE.Vector3(controllerData.axes[2], 0, controllerData.axes[3]);
       direction.applyQuaternion(new THREE.Quaternion(0, orientation.y, 0));
       cameraContainer.position.addScaledVector(direction, speed);
     }
