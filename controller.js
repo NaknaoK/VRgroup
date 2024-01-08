@@ -102,7 +102,7 @@ async function init() {
   mapGroup.add(model4);
   scene.add(mapGroup);
   //mapの大きさ0.01倍
-  mapGroup.scale.set(0.01, 0.01, 0.01);
+  mapGroup.scale.set(1, 1, 1);
   /* ----Map関係---- */
   /* ----CSV関係---- */
   var req = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
