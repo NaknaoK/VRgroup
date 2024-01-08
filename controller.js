@@ -310,7 +310,7 @@ async function init() {
       //   speed = 1;
       // }
       if(bugRotat > 3){
-        // speed *= -1;
+        speed *= -1;
         cameraRotation.y *= -1;
       }
       move(cameraRotation , speed);
