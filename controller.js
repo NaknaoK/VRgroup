@@ -324,7 +324,11 @@ async function init() {
       // }else{//前面を見てる
 
       // }
-      const cameraRotation = camera.rotation;
+      const bugRotat = Math.abs(camera.rotation.x)+Math.abs(camera.rotation.z);
+      let cameraRotation = camera.rotation;
+      if(bugRotat > 4){
+        cameraRotation.y = -1*camera.rotation.y;
+      }
       const speed = (Math.abs(controllerData.axes[2])+Math.abs(controllerData.axes[3]))/2;
       if(speed > 1){speed = 1;}
       move(cameraRotation , speed);
