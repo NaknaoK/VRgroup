@@ -227,7 +227,7 @@ async function init() {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
           controller2.gamepad = event.data.gamepad;
-          //console.log(event.data.gamepad);
+          console.log(camera.rotation);
         }
     }
   });
@@ -349,7 +349,7 @@ async function init() {
   }
   // 移動関数
     function move(orientation , speed) {
-      const direction = new THREE.Vector3(controllerData.axes[2], 0, controllerData.axes[3]);
+      const direction = new THREE.Vector3(controller1.gamepad.axes[2], 0, controller1.gamepad.axes[3]);
       direction.applyQuaternion(new THREE.Quaternion(0, orientation.y, 0));
       cameraContainer.position.addScaledVector(direction, speed);
     }
