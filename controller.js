@@ -326,7 +326,7 @@ async function init() {
       // }
       const bugRotat = Math.abs(camera.rotation.x)+Math.abs(camera.rotation.z);
       const cameraRotation = camera.rotation;
-      const speed = (Math.abs(controllerData.axes[2])+Math.abs(controllerData.axes[3]))/2;
+      let speed = (Math.abs(controllerData.axes[2])+Math.abs(controllerData.axes[3]))/2;
       if(speed > 1){speed = 1;}
       if(bugRotat > 3){
         speed *= -1;
