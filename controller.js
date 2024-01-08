@@ -325,12 +325,12 @@ async function init() {
 
       // }
       const bugRotat = Math.abs(camera.rotation.x)+Math.abs(camera.rotation.z);
-      let cameraRotation = camera.rotation;
-      if(bugRotat > 4){
-        cameraRotation.y = -1*camera.rotation.y;
-      }
+      const cameraRotation = camera.rotation;
       const speed = (Math.abs(controllerData.axes[2])+Math.abs(controllerData.axes[3]))/2;
       if(speed > 1){speed = 1;}
+      if(bugRotat > 3){
+        speed *= -1;
+      }
       move(cameraRotation , speed);
       //cameraContainer.position.x += Math.cos(Math.PI*(camera.rotation.y/1.5))*controllerData.axes[2];
       //cameraContainer.position.z += Math.sin(Math.PI*(camera.rotation.y/1.5))*controllerData.axes[3];
