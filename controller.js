@@ -11,6 +11,7 @@ import { OrbitControls } from 'https://unpkg.com/three@0.150.1/examples/jsm/cont
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 let controller1, controller2;
 let controllerGrip1, controllerGrip2;
+const CenterLatitude = 354045000,CenterLongitude = 1394587500;//中心の緯度,経度
 
 /* ----Map関係---- */
 
@@ -46,8 +47,7 @@ async function init() {
   const camera = new THREE.PerspectiveCamera(90, width / height);
 
   //CSVデータを格納するやつら
-  let data = [];
-  //let data = [1][4];
+  let trafficAccident = [];
   
   // カメラ用コンテナを作成(3Dのカメラを箱に入れて箱自体を動かす) 
   const cameraContainer = new THREE.Object3D();
@@ -109,33 +109,39 @@ async function init() {
   /* ----Map関係---- */
   /* ----CSV関係---- */
   var req = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
-  req.open("get", "syuukei04.csv", true); // アクセスするファイルを指定
+  req.open("get", "honhyo_2022.csv", true); // アクセスするファイルを指定
   req.overrideMimeType("text/plain; charset=Shift_JIS");//文字コードの上書き
   req.send(null); // HTTPリクエストの発行
   
   // レスポンスが返ってきたらconvertCSVtoArray()を呼ぶ	
-  let d = 0;
   req.onload = function(){
 	  convertCSVtoArray(req.responseText); // 渡されるのは読み込んだCSVデータ
-    d = data[1][4];
-    
+    console.log(trafficAccident[1][1]);
+    //追加 阿部
+    for(let i = 1; i < trafficAccident.length; i++){
+        if(trafficAccident[i][1] == 30){
+          const data1 = trafficAccident[i][60];
+          //console.log(data1);
+          if(354030000 < data1 || data1 < 354060000){//中心の緯度
+            const data2 = trafficAccident[i][61];
+            //console.log(data2);
+            if(1394545000<data2 || data2<1394630000){//中心の経度
+              createAccidentPoint(data1, data2);
+              console.log(3);
+            }
+          }
+        }
+    }
+    createTrafficVolumeObject(5, 1, 0, 0, 0, 0, 0, trafficAccident[1][4]); //テストとして事故のデータを渡しているが、運用時は交通量に変更
   }
-  // 立方体の作成
-  const cube = createCube();
-  //console.log(d);
-  cube.position.set( 0, 100, -500);
-  const cube2 = cube;
-  scene.add(cube2);
+  
   // 読み込んだCSVデータを二次元配列に変換する関数convertCSVtoArray()の定義
   function convertCSVtoArray(str){ // 読み込んだCSVデータが文字列として渡される
-    //let result = []; // 最終的な二次元配列を入れるための配列
     let tmp = str.split("\n"); // 改行を区切り文字として行を要素とした配列を生成
-    // 各行ごとにカンマで区切った文字列を要素とした二次元配列を生成
+    //各行ごとにカンマで区切った文字列を要素とした二次元配列を生成
     for(var i=0;i<tmp.length;++i){
-      data[i] = tmp[i].split(',');
+      trafficAccident[i] = tmp[i].split(',');
     }
-    //console.log(data[1][4]);
-    //return result; //result[1][4]の値を返す
   }
   /* ----CSV関係---- */
 
@@ -227,7 +233,7 @@ async function init() {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
           controller2.gamepad = event.data.gamepad;
-          console.log(camera.rotation);
+          //console.log(camera.rotation);
         }
     }
   });
@@ -241,7 +247,7 @@ async function init() {
   controllerGrip2 = renderer.xr.getControllerGrip(1);
   controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
   cameraContainer.add( controllerGrip2 );
-  //コントローラーから出る光線の作成				
+  //コントローラーから出る光線の作成
   const geo = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 )]);
   const mat = new THREE.LineBasicMaterial({color: 0xff0000});
   const line = new THREE.Line( geo , mat );
@@ -319,7 +325,6 @@ async function init() {
 		}
 
     
-    cube2.position.set( xx, yy, -500);
 	}
 
   function handleController2( controller ) {
@@ -374,6 +379,41 @@ async function init() {
     }
     return color;
   }
+//追加 阿部 事故を表すオブジェクトの生成
+function createAccidentPoint(posX, posZ) {
+  const geometry = new THREE.BoxGeometry(5,5,5);
+  const material = new THREE.MeshBasicMaterial({color: 0xF4E511});
+  const cube = new THREE.Mesh(geometry, material);
+  cube.position.set(posX, 200, posZ);
+  const ray = new THREE.Mesh(new THREE.CylinderGeometry(1,1,200,5),new THREE.MeshPhongMaterial({color: 0xF4E511}));
+  ray.material.transparent = true;
+  ray.material.opacity = 0.5
+  ray.position.set(posX, -100, posZ);
+  cube.add(ray);
+  scene.add(cube);
+  console.log(cube.position.x + ", " + cube.position.z);
+  console.log(cube);
+}
+
+//追加 阿部 交通量を表すオブジェクトの生成
+function createTrafficVolumeObject(sizeX, sizeZ, posX, posY, posZ, rotX, rotY, trafficVolume){
+  const geometry = new THREE.BoxGeometry(sizeX,1,sizeZ);
+  let material = new THREE.MeshBasicMaterial({color: 0x0067C0}); //交通量が最低領域の場合の色を設定
+  //交通量が多い場合は交通量の値が含まれる領域に応じて色を変更
+  if(trafficVolume >= 2){ //領域（仮の値）
+    material = new THREE.MeshBasicMaterial({color: 0xED1A3D});
+    //console.log("0xED1A3D");
+  }else if(trafficVolume >= 1){
+    material = new THREE.MeshBasicMaterial({color: 0xF58220});
+  }
+  const cube = new THREE.Mesh(geometry, material);
+  cube.position.set(posX+200, posY, posZ);
+  cube.rotation.set(rotX, rotY, 0);
+  scene.add(cube);
+  console.log(cube.position.x + ", " + cube.position.z)
+}
+
+
 
   // レンダラーにループ関数を登録
   renderer.setAnimationLoop(tick);
