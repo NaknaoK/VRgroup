@@ -45,12 +45,13 @@ async function init() {
 
   // カメラを作成
   const camera = new THREE.PerspectiveCamera(90, width / height);
-
+  // camera.position.set( 500, 0, 0 );
   //CSVデータを格納するやつら
   let trafficAccident = [];
   
   // カメラ用コンテナを作成(3Dのカメラを箱に入れて箱自体を動かす) 
   const cameraContainer = new THREE.Object3D();
+  cameraContainer.position.set( 0, 0, -40 );
   cameraContainer.add(camera);
   // cameraContainer.add(controller1);
   // cameraContainer.add(controller2);
@@ -122,11 +123,13 @@ async function init() {
         if(trafficAccident[i][1] == 30){
           const data1 = trafficAccident[i][60];
           //console.log(data1);
-          if(354030000 < data1 || data1 < 354060000){//中心の緯度
+          if(354030000 < data1 || data1 < 354060000){//範囲内の緯度かを確認
             const data2 = trafficAccident[i][61];
             //console.log(data2);
-            if(1394545000<data2 || data2<1394630000){//中心の経度
-              createAccidentPoint(data1, data2);
+            if(1394545000<data2 || data2<1394630000){//範囲内の経度かを確認
+              const posX = (data1-CenterLatitude)*580/15000;//緯度を計算
+              const posZ = (CenterLongitude-data2)*481/42500;//経度を計算
+              createAccidentPoint(posX, posZ);
               console.log(3);
             }
           }
