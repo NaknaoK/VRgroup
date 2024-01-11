@@ -45,13 +45,13 @@ async function init() {
 
   // カメラを作成
   const camera = new THREE.PerspectiveCamera(90, width / height);
-  // camera.position.set( 500, 0, 0 );
+  camera.position.set( 0, 0, 0 );
   //CSVデータを格納するやつら
   let trafficAccident = [];
   
   // カメラ用コンテナを作成(3Dのカメラを箱に入れて箱自体を動かす) 
   const cameraContainer = new THREE.Object3D();
-  cameraContainer.position.set( 0, 0, -40 );
+  cameraContainer.position.set( 500, 400, 0 );
   cameraContainer.add(camera);
   // cameraContainer.add(controller1);
   // cameraContainer.add(controller2);
@@ -114,6 +114,7 @@ async function init() {
   req.overrideMimeType("text/plain; charset=Shift_JIS");//文字コードの上書き
   req.send(null); // HTTPリクエストの発行
   
+  var accidentGroup = new THREE.Group();
   // レスポンスが返ってきたらconvertCSVtoArray()を呼ぶ	
   req.onload = function(){
 	  convertCSVtoArray(req.responseText); // 渡されるのは読み込んだCSVデータ
@@ -127,14 +128,15 @@ async function init() {
             const data2 = trafficAccident[i][61];
             //console.log(data2);
             if(1394545000<data2 || data2<1394630000){//範囲内の経度かを確認
-              const posX = (data1-CenterLatitude)*580/15000;//緯度を計算
-              const posZ = (CenterLongitude-data2)*481/42500;//経度を計算
+              const posX = (data1-CenterLatitude)*580/150000;//緯度を計算
+              const posZ = (CenterLongitude-data2)*481/425000;//経度を計算
               createAccidentPoint(posX, posZ);
               console.log(3);
             }
           }
         }
     }
+    scene.add(accidentGroup);
     createTrafficVolumeObject(5, 1, 0, 0, 0, 0, 0, trafficAccident[1][4]); //テストとして事故のデータを渡しているが、運用時は交通量に変更
   }
   
@@ -384,18 +386,16 @@ async function init() {
   }
 //追加 阿部 事故を表すオブジェクトの生成
 function createAccidentPoint(posX, posZ) {
-  const geometry = new THREE.BoxGeometry(5,5,5);
+  const geometry = new THREE.BoxGeometry(1,1,1);
   const material = new THREE.MeshBasicMaterial({color: 0xF4E511});
   const cube = new THREE.Mesh(geometry, material);
   cube.position.set(posX, 200, posZ);
-  const ray = new THREE.Mesh(new THREE.CylinderGeometry(1,1,200,5),new THREE.MeshPhongMaterial({color: 0xF4E511}));
+  const ray = new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,200),new THREE.MeshPhongMaterial({color: 0xF4E511}));
   ray.material.transparent = true;
-  ray.material.opacity = 0.5
-  ray.position.set(posX, -100, posZ);
-  cube.add(ray);
-  scene.add(cube);
-  console.log(cube.position.x + ", " + cube.position.z);
-  console.log(cube);
+  //ray.material.opacity = 0.5;
+  ray.position.set(posX, 100, posZ);
+  accidentGroup.add(ray);
+  accidentGroup.add(cube);
 }
 
 //追加 阿部 交通量を表すオブジェクトの生成
@@ -410,7 +410,7 @@ function createTrafficVolumeObject(sizeX, sizeZ, posX, posY, posZ, rotX, rotY, t
     material = new THREE.MeshBasicMaterial({color: 0xF58220});
   }
   const cube = new THREE.Mesh(geometry, material);
-  cube.position.set(posX+200, posY, posZ);
+  cube.position.set(posX, posY, posZ);
   cube.rotation.set(rotX, rotY, 0);
   scene.add(cube);
   console.log(cube.position.x + ", " + cube.position.z)
