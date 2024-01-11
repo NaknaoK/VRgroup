@@ -11,7 +11,7 @@ import { OrbitControls } from 'https://unpkg.com/three@0.150.1/examples/jsm/cont
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 let controller1, controller2;
 let controllerGrip1, controllerGrip2;
-const CenterLatitude = 354045000,CenterLongitude = 1394587500;//中心の緯度,経度
+const CenterLatitude = 354030002,CenterLongitude = 1394545001;//中心の緯度,経度
 
 /* ----Map関係---- */
 
@@ -51,7 +51,7 @@ async function init() {
   
   // カメラ用コンテナを作成(3Dのカメラを箱に入れて箱自体を動かす) 
   const cameraContainer = new THREE.Object3D();
-  cameraContainer.position.set( 500, 400, 0 );
+  cameraContainer.position.set( 0, 0, 0 );
   cameraContainer.add(camera);
   // cameraContainer.add(controller1);
   // cameraContainer.add(controller2);
@@ -106,11 +106,11 @@ async function init() {
   mapGroup.add(model4);
   scene.add(mapGroup);
   //mapの大きさ0.01倍
-  mapGroup.scale.set(1, 1, 1);
+  //mapGroup.scale.set(1, 1, 1);
   /* ----Map関係---- */
   /* ----CSV関係---- */
   var req = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
-  req.open("get", "honhyo_2022.csv", true); // アクセスするファイルを指定
+  req.open("get", "honhyo_2021.csv", true); // アクセスするファイルを指定
   req.overrideMimeType("text/plain; charset=Shift_JIS");//文字コードの上書き
   req.send(null); // HTTPリクエストの発行
   
@@ -122,14 +122,14 @@ async function init() {
     //追加 阿部
     for(let i = 1; i < trafficAccident.length; i++){
         if(trafficAccident[i][1] == 30){
-          const data1 = trafficAccident[i][60];
+          const data1 = trafficAccident[i][54];
           //console.log(data1);
-          if(354030000 < data1 || data1 < 354060000){//範囲内の緯度かを確認
-            const data2 = trafficAccident[i][61];
+          if(354030000 < data1 && data1 < 354060000){//範囲内の緯度かを確認
+            const data2 = trafficAccident[i][55];
             //console.log(data2);
-            if(1394545000<data2 || data2<1394630000){//範囲内の経度かを確認
-              const posX = (data1-CenterLatitude)*580/150000;//緯度を計算
-              const posZ = (CenterLongitude-data2)*481/425000;//経度を計算
+            if(1394545000<data2 && data2<1394630000){//範囲内の経度かを確認
+              const posX = (data1-CenterLatitude)*580/15000;//緯度を計算
+              const posZ = (CenterLongitude-data2)*481/42500;//経度を計算
               createAccidentPoint(posX, posZ);
               console.log(3);
             }
