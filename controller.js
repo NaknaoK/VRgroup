@@ -11,7 +11,7 @@ import { OrbitControls } from 'https://unpkg.com/three@0.150.1/examples/jsm/cont
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 let controller1, controller2;
 let controllerGrip1, controllerGrip2;
-const CenterLatitude = 354030002,CenterLongitude = 1394545001;//中心の緯度,経度
+const CenterLatitude = 356791527,CenterLongitude = 1397686666;//中心の緯度,経度
 
 /* ----Map関係---- */
 
@@ -36,8 +36,6 @@ async function init() {
   });
   renderer.setSize(width, height);
   
-  // console.log(renderer);
-  // console.log("kakakakkakakaka");
   renderer.xr.enabled = true;// レンダラーのXRを有効化
   document.body.appendChild(renderer.domElement);
   // WebVRの開始ボタンをDOMに追加
@@ -45,16 +43,13 @@ async function init() {
 
   // カメラを作成
   const camera = new THREE.PerspectiveCamera(90, width / height);
-  camera.position.set( 0, 0, 0 );
   //CSVデータを格納するやつら
   let trafficAccident = [];
   
   // カメラ用コンテナを作成(3Dのカメラを箱に入れて箱自体を動かす) 
   const cameraContainer = new THREE.Object3D();
-  cameraContainer.position.set( 0, 0, 0 );
+  cameraContainer.position.set( -30, 200, 0 );
   cameraContainer.add(camera);
-  // cameraContainer.add(controller1);
-  // cameraContainer.add(controller2);
   scene.add(cameraContainer);
   
   //コントローラーのステック操作の閾値
@@ -63,17 +58,6 @@ async function init() {
 
   // 光源を作成
   {
-    // const spotLight = new THREE.SpotLight(
-    //   0xffffff,
-    //   4,
-    //   2000,
-    //   Math.PI / 5,
-    //   0.2,
-    //   1.5
-    // );
-    // spotLight.position.set(10, 10, 10);
-    // scene.add(spotLight);
-
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambientLight);
     //光源を作成
@@ -91,14 +75,14 @@ async function init() {
   // GLTF形式のモデルデータを読み込む
   const loader = new GLTFLoader();
   // GLTFファイルのパスを指定
-  const objects1 = await loader.loadAsync("gltf/53394611_bldg_6697_2_op/53394611_bldg_6697_2_op.gltf");
+  const objects1 =await loader.loadAsync("gltf/53394611_bldg_6697_2_op/53394611_bldg_6697_2_op.gltf");//gltf
   // 読み込み後に3D空間に追加
   const model1 = objects1.scene;
-  const objects2 = await loader.loadAsync("gltf/533946_dem_6697_op/533946_dem_6697_op.gltf");
+  const objects2 = await loader.loadAsync("gltf/533946_dem_6697_op/533946_dem_6697_op.gltf");//gltf
   const model2 = objects2.scene;
-  const objects3 = await loader.loadAsync("gltf/53394611_brid_6697_op/53394611_brid_6697_op.gltf");
+  const objects3 = await loader.loadAsync("gltf/53394611_brid_6697_op/53394611_brid_6697_op.gltf");//gltf
   const model3 = objects3.scene;
-  const objects4 = await loader.loadAsync("gltf/53394611_tran_6668_op/53394611_tran_6668_op.gltf");
+  const objects4 = await loader.loadAsync("gltf/53394611_tran_6668_op/53394611_tran_6668_op.gltf");//gltf
   const model4 = objects4.scene;
   mapGroup.add(model1);
   mapGroup.add(model2);
@@ -106,7 +90,8 @@ async function init() {
   mapGroup.add(model4);
   scene.add(mapGroup);
   //mapの大きさ0.01倍
-  //mapGroup.scale.set(1, 1, 1);
+  mapGroup.scale.set(1, 1, -1);
+
   /* ----Map関係---- */
   /* ----CSV関係---- */
   var req = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
@@ -123,24 +108,43 @@ async function init() {
     for(let i = 1; i < trafficAccident.length; i++){
         if(trafficAccident[i][1] == 30){
           const data1 = trafficAccident[i][54];
-          //console.log(data1);
           if(354030000 < data1 && data1 < 354060000){//範囲内の緯度かを確認
             const data2 = trafficAccident[i][55];
             //console.log(data2);
             if(1394545000<data2 && data2<1394630000){//範囲内の経度かを確認
-              const posX = (data1-CenterLatitude)*580/15000;//緯度を計算
-              const posZ = (CenterLongitude-data2)*481/42500;//経度を計算
+              const num1 = CenterLatitude-convertLatitudeAndLongitude(data1);
+              const num2 = convertLatitudeAndLongitude(data2)-CenterLongitude;
+              let leverage1 = 478/(CenterLatitude-354030000);
+              let leverage2 = 575/(1394630000-CenterLongitude);//85.000
+              if(num1<0){
+                leverage1 = 484/(354060000-CenterLatitude);
+              }
+              if(num2<0){
+                leverage2 = 585/(CenterLongitude-1394545000);
+              }
+              const posX = num1*leverage1;//緯度を計算
+              const posZ = num2*leverage2;//経度を計算
               createAccidentPoint(posX, posZ);
-              console.log(3);
+              console.log();
             }
           }
         }
     }
+    
+    createAccidentPoint(0, 0);
     scene.add(accidentGroup);
     createTrafficVolumeObject(5, 1, 0, 0, 0, 0, 0, trafficAccident[1][4]); //テストとして事故のデータを渡しているが、運用時は交通量に変更
   }
   
   // 読み込んだCSVデータを二次元配列に変換する関数convertCSVtoArray()の定義
+  function convertLatitudeAndLongitude(str){ // 読み込んだCSVデータが文字列として渡される
+    var deg = Number(str.slice(0,3));
+    var min = Number(str.slice(3,5));
+    var sec = Number(str.slice(5));
+    var result = deg*1000000+min*10000+sec;
+    return result;
+  }
+
   function convertCSVtoArray(str){ // 読み込んだCSVデータが文字列として渡される
     let tmp = str.split("\n"); // 改行を区切り文字として行を要素とした配列を生成
     //各行ごとにカンマで区切った文字列を要素とした二次元配列を生成
@@ -157,9 +161,6 @@ async function init() {
   // コントローラーイベントの設定
   function onSelectStart() {
     this.userData.isSelecting = true;
-    //console.log(controller1);
-    //console.log(camera.rotation);
-    // console.log(this._listeners['buttondown'].indexOf( onButtonDown ));
   }
   function onSelectEnd() {
     this.userData.isSelecting = false;
@@ -175,27 +176,8 @@ async function init() {
   controller1 = renderer.xr.getController( 0 );
   controller1.addEventListener( 'selectstart', onSelectStart);
   controller1.addEventListener( 'selectend', onSelectEnd );
-  // controller1.addEventListener('triggerdown', onTriggerDown);
-  // controller1.addEventListener('triggerup', onTriggerUp);
   controller1.addEventListener('squeezestart', onSqueezeStart);
   controller1.addEventListener('squeezeend', onSqueezeEnd);
-  //controller1.addEventListener('buttondown', (e) =>{e});
-  // controller1.addEventListener('buttondown', (event) => {
-  //   const buttonId = event.data.button; // ボタンのIDを取得
-  //   switch (buttonId) {
-  //     case 0: // Aボタン
-  //       console.log('A button pressed!');
-  //       // Aボタンが押されたときの処理を追加
-  //       cameraContainer.position.x += 0.01;
-  //       this.userData.isSelecting = true;
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // });
-  // controller1.addEventListener("connected", (e) => {
-  //   console.log(e.data.gamepad)
-  // })
   controller1.addEventListener('gamepadconnected', (event) => {
     const gamepad = event.gamepad;
     // サムスティックの変更があったときの処理
@@ -208,41 +190,22 @@ async function init() {
         if('axes' in event.data.gamepad){ //we have a modern controller
           controller1.gamepad = event.data.gamepad;
           VRconnect = true;
-          //console.log(controller1);
-          //console.log(controller1.gamepad);
         }
     }
   });
   cameraContainer.add(controller1);
-  //scene.add( controller1 );
   controller2 = renderer.xr.getController( 1 );
   controller2.addEventListener( 'selectstart', onSelectStart );
   controller2.addEventListener( 'selectend', onSelectEnd );
   controller2.addEventListener('squeezestart', onSqueezeStart);
   controller2.addEventListener('squeezeend', onSqueezeEnd);
-  // controller2.addEventListener('inputsourceschange', (event) => {
-  //   const buttonId = event.data.button; // ボタンのIDを取得
-  //   switch (buttonId) {
-  //     case 0: // Aボタン
-  //       console.log('A button pressed!');
-  //       // Aボタンが押されたときの処理を追加
-  //       cameraContainer.position.x += 0.01;
-  //       this.userData.isSelecting = true;
-  //       break;
-  //     default:
-  //       cameraContainer.position.x -= 0.01;
-  //       break;
-  //   }
-  // });
   controller2.addEventListener( 'connected', ( event )=> {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){ //we have a modern controller
           controller2.gamepad = event.data.gamepad;
-          //console.log(camera.rotation);
         }
     }
   });
-  // scene.add( controller2 );
   cameraContainer.add(controller2);
   //コントローラーモデルを取得
   const controllerModelFactory = new XRControllerModelFactory();
@@ -264,23 +227,16 @@ async function init() {
 
   let xx = 0,yy = 100;
   //機能
-	function handleController1( controller ) {
+	function handleController1( controller ) {//controller1の処理
 		const userData = controller.userData;
     const controllerData = controller.gamepad;
-    //controller1 = controller;
 		if ( userData.isSelecting === true ) {//コントローラーボタンが押された際の処理
-      
-      //console.log(Math.abs(-90.0));
       
       if(controllerData.buttons[0].pressed == true){
         cameraContainer.position.y += controllerData.buttons[0].value;
       }else if(controllerData.buttons[1].pressed == true){
         cameraContainer.position.y -= controllerData.buttons[1].value;
         xx = 50;
-        //xx = controller1.gamepad.axes[1] * 100;
-        // yy = controller2.gamepad.axes[1] * 100;
-        //console.log(2);
-      //}
       }else if(controllerData.buttons[2].pressed == true){
         xx = 150;
       }else if(controllerData.buttons[3].pressed == true){
@@ -292,59 +248,26 @@ async function init() {
       }else if(controllerData.buttons[6].pressed == true){
         xx = 550;
       }
-      
-      
-      //cameraContainer.position.x += 0.1;
-      // cube.position.set(
-      //   Math.random() * -1000 - 300,  // x座標を-5から5の範囲でランダムに設定
-      //   0,  // y座標
-      //   Math.random() * -1000 - 300   // z座標を-5から5の範囲でランダムに設定
-      // );
-      // scene.add(cube);
 		} else {
-      // if(controller1.gamepad.axes[2] > 0 || controller1.gamepad.axes[2] < 0){
-      //   cameraContainer.position.x += controllerData.axes[2];
-      // }
-      // if(controller1.gamepad.axes[3] >= threshold || controller1.gamepad.axes[3] <= 0-threshold){
-      //   cameraContainer.position.z += controllerData.axes[3];
-      // }
-      //const speed = Math.abs(controllerData.axes[2])+Math.abs(controllerData.axes[3]);
-      // if(camera.rotation.y < 0){
-
-      // }else{//前面を見てる
-
-      // }
       let cameraRotation = camera.rotation;
       const bugRotat = (Math.abs(cameraRotation.x)+Math.abs(cameraRotation.z));
       let speed = (Math.abs(controllerData.axes[2])+Math.abs(controllerData.axes[3]))/2;
-      // if(speed > 1){
-      //   speed = 1;
-      // }
       if(bugRotat > 3){
         speed *= -1;
         cameraRotation.y *= -1;
       }
       move(cameraRotation , speed);
-      //cameraContainer.position.x += Math.cos(Math.PI*(camera.rotation.y/1.5))*controllerData.axes[2];
-      //cameraContainer.position.z += Math.sin(Math.PI*(camera.rotation.y/1.5))*controllerData.axes[3];
 		}
 
     
 	}
 
-  function handleController2( controller ) {
+  function handleController2( controller ) {//controller2の処理
     const controllerData = controller.gamepad;
     if(controllerData.buttons[0].pressed == true){
       yy = 50;
-      // xx = controller1.gamepad.axes[2] * 100;
-      // yy = controller2.gamepad.axes[2] * 100;
-      //console.log(3);
     }else if(controllerData.buttons[1].pressed == true){
       yy = 75;
-      // xx = controller1.gamepad.axes[3] * 100;
-      // yy = controller2.gamepad.axes[3] * 100;
-      //console.log(4);
-    //}
     }else if(controllerData.buttons[2].pressed == true){
       yy = 125;
     }else if(controllerData.buttons[3].pressed == true){
@@ -364,26 +287,6 @@ async function init() {
       cameraContainer.position.addScaledVector(direction, speed);
     }
   /* ----コントローラー設定----- */
-  
-
-  // 立方体を生成する関数
-  function createCube() {
-    const geometry = new THREE.BoxGeometry(100,100,100);
-    const material = new THREE.MeshBasicMaterial({ color: getRandomColor() });//のっぺりとした影が出来ない
-    //const material = new THREE.MeshPhongMaterial({ color: getRandomColor() });//光沢感が出る
-    //const material = new THREE.MeshStandardMaterial({ color: getRandomColor() });//現実の物理現象を再現する
-    const cube = new THREE.Mesh(geometry, material);
-    return cube;
-  }
-    // ランダムな色を生成する関数
-  function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  }
 //追加 阿部 事故を表すオブジェクトの生成
 function createAccidentPoint(posX, posZ) {
   const geometry = new THREE.BoxGeometry(1,1,1);
@@ -392,7 +295,6 @@ function createAccidentPoint(posX, posZ) {
   cube.position.set(posX, 200, posZ);
   const ray = new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,200),new THREE.MeshPhongMaterial({color: 0xF4E511}));
   ray.material.transparent = true;
-  //ray.material.opacity = 0.5;
   ray.position.set(posX, 100, posZ);
   accidentGroup.add(ray);
   accidentGroup.add(cube);
@@ -405,7 +307,6 @@ function createTrafficVolumeObject(sizeX, sizeZ, posX, posY, posZ, rotX, rotY, t
   //交通量が多い場合は交通量の値が含まれる領域に応じて色を変更
   if(trafficVolume >= 2){ //領域（仮の値）
     material = new THREE.MeshBasicMaterial({color: 0xED1A3D});
-    //console.log("0xED1A3D");
   }else if(trafficVolume >= 1){
     material = new THREE.MeshBasicMaterial({color: 0xF58220});
   }
@@ -413,7 +314,6 @@ function createTrafficVolumeObject(sizeX, sizeZ, posX, posY, posZ, rotX, rotY, t
   cube.position.set(posX, posY, posZ);
   cube.rotation.set(rotX, rotY, 0);
   scene.add(cube);
-  console.log(cube.position.x + ", " + cube.position.z)
 }
 
 
@@ -423,11 +323,6 @@ function createTrafficVolumeObject(sizeX, sizeZ, posX, posY, posZ, rotX, rotY, t
   
   // 毎フレーム時に実行されるループイベント
   function tick() {
-    
-    
-
-
-
     // レンダリング
     if(VRconnect){
       handleController1( controller1 );
