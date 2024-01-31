@@ -28,7 +28,7 @@ async function init() {
   
   // シーンの作成
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color( 0xe0e0e0 );
+  scene.background = new THREE.Color( 0x000000 );
   
   // レンダラーの作成
   const renderer = new THREE.WebGLRenderer({
