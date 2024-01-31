@@ -11,7 +11,7 @@ import { OrbitControls } from 'https://unpkg.com/three@0.150.1/examples/jsm/cont
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 let controller1, controller2;
 let controllerGrip1, controllerGrip2;
-const CenterLatitude = 356791527,CenterLongitude = 1397686666;//中心の緯度,経度
+
 
 /* ----Map関係---- */
 
@@ -48,7 +48,7 @@ async function init() {
   
   // カメラ用コンテナを作成(3Dのカメラを箱に入れて箱自体を動かす) 
   const cameraContainer = new THREE.Object3D();
-  cameraContainer.position.set( -30, 200, 0 );
+  cameraContainer.position.set( 20, 30, 0 );
   cameraContainer.add(camera);
   scene.add(cameraContainer);
   
@@ -56,6 +56,16 @@ async function init() {
   const threshold = 0.1;
   let VRconnect = false;
 
+  //マップのデータ
+  const CenterLatitude = 356791527,CenterLongitude = 1397686666;//中心の緯度,経度（度）
+  const East = convertLatitudeAndLongitude("1394630000"),
+        West = convertLatitudeAndLongitude("1394545000"),
+        North = convertLatitudeAndLongitude("354060000"),
+        South = convertLatitudeAndLongitude("354030000");
+        console.log(East);
+        console.log(West);
+        console.log(North);
+        console.log(South);
   // 光源を作成
   {
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
@@ -94,38 +104,44 @@ async function init() {
 
   /* ----Map関係---- */
   /* ----CSV関係---- */
-  var req = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
-  req.open("get", "honhyo_2021.csv", true); // アクセスするファイルを指定
-  req.overrideMimeType("text/plain; charset=Shift_JIS");//文字コードの上書き
-  req.send(null); // HTTPリクエストの発行
+  var req1 = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
+  req1.open("get", "honhyo_2024.csv", true); // アクセスするファイルを指定
+  req1.overrideMimeType("text/plain; charset=Shift_JIS");//文字コードの上書き
+  req1.send(null); // HTTPリクエストの発行
   
   var accidentGroup = new THREE.Group();
   // レスポンスが返ってきたらconvertCSVtoArray()を呼ぶ	
-  req.onload = function(){
-	  convertCSVtoArray(req.responseText); // 渡されるのは読み込んだCSVデータ
-    console.log(trafficAccident[1][1]);
-    //追加 阿部
+  req1.onload = function(){
+	  convertCSVtoArray(req1.responseText); // 渡されるのは読み込んだCSVデータ
+    // console.log(trafficAccident[1][1]);
+    // 追加 阿部
     for(let i = 1; i < trafficAccident.length; i++){
         if(trafficAccident[i][1] == 30){
-          const data1 = trafficAccident[i][54];
-          if(354030000 < data1 && data1 < 354060000){//範囲内の緯度かを確認
-            const data2 = trafficAccident[i][55];
-            //console.log(data2);
-            if(1394545000<data2 && data2<1394630000){//範囲内の経度かを確認
-              const num1 = CenterLatitude-convertLatitudeAndLongitude(data1);
-              const num2 = convertLatitudeAndLongitude(data2)-CenterLongitude;
-              let leverage1 = 478/(CenterLatitude-354030000);
-              let leverage2 = 575/(1394630000-CenterLongitude);//85.000
-              if(num1<0){
-                leverage1 = 484/(354060000-CenterLatitude);
+          const data1 = convertLatitudeAndLongitude(trafficAccident[i][54]);
+          if(South < data1 && data1 < North){//範囲内の緯度（度分秒）かを確認
+            const data2 = convertLatitudeAndLongitude(trafficAccident[i][55]);
+            // console.log(data2);
+            if(West<data2 && data2<East){//範囲内の経度（度分秒）かを確認
+              const num1 = CenterLatitude-data1;//中心からの距離、緯度（度）
+              const num2 = data2-CenterLongitude;//中心からの距離、経度（度）
+              let leverage1 = 0;//
+              let leverage2 = 0;//
+              //オブジェクトの中心がずれているため、正負によって処理を変える
+              //※jsのZ軸は北が負、南が正（EUSになってる）※
+              if(num1<0){//中心より北にある
+                leverage1 = 484/(North-CenterLatitude);//
+              }else{//中心より南にある
+                leverage1 = 478/(CenterLatitude-South);//
               }
-              if(num2<0){
-                leverage2 = 585/(CenterLongitude-1394545000);
+              if(num2<0){//中心より西にある
+                leverage2 = 585/(CenterLongitude-West);//
+              }else{//中心より東にある
+                leverage2 = 575/(East-CenterLongitude);//
               }
-              const posX = num1*leverage1;//緯度を計算
-              const posZ = num2*leverage2;//経度を計算
+              const posX = num2*leverage2-1;//経度からポジションを計算
+              const posZ = num1*leverage1;//緯度からポジションを計算
               createAccidentPoint(posX, posZ);
-              console.log();
+              console.log(posX +"  "+posZ);
             }
           }
         }
@@ -133,16 +149,34 @@ async function init() {
     
     createAccidentPoint(0, 0);
     scene.add(accidentGroup);
-    createTrafficVolumeObject(5, 1, 0, 0, 0, 0, 0, trafficAccident[1][4]); //テストとして事故のデータを渡しているが、運用時は交通量に変更
+    // createTrafficVolumeObject(5, 1, 0, 0, 0, 0, 0, trafficAccident[1][4]); //テストとして事故のデータを渡しているが、運用時は交通量に変更
   }
   
-  // 読み込んだCSVデータを二次元配列に変換する関数convertCSVtoArray()の定義
-  function convertLatitudeAndLongitude(str){ // 読み込んだCSVデータが文字列として渡される
-    var deg = Number(str.slice(0,3));
-    var min = Number(str.slice(3,5));
-    var sec = Number(str.slice(5));
-    var result = deg*1000000+min*10000+sec;
-    return result;
+  var req2 = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
+  req2.open("get", "zkntrf13.csv", true); // アクセスするファイルを指定
+  req2.overrideMimeType("text/plain; charset=Shift_JIS");//文字コードの上書き
+  req2.send(null); // HTTPリクエストの発行
+  var trafficVolume = new THREE.Group();
+  req2.onload = function(){
+    console.log("aaasasassasa");
+  }
+
+
+  function convertLatitudeAndLongitude(str){ //度分秒から度に変換する
+    let strCount = str.toString().length;
+    if(strCount == 9){//読み込んだ緯度のデータを変換する
+      var deg = Number(str.slice(0,2));//度
+      var min = Number(str.slice(2,4));//分
+      var sec = Number(str.slice(4));//秒
+      var result = Math.round((deg+min/60+sec/1/3600000)*10000000);
+      return result;
+    }else{//読み込んだ経度のデータを変換する
+      var deg = Number(str.slice(0,3));//度
+      var min = Number(str.slice(3,5));//分
+      var sec = Number(str.slice(5));//秒
+      var result = Math.round((deg+min/60+sec/1/3600000)*10000000);
+      return result;
+    }
   }
 
   function convertCSVtoArray(str){ // 読み込んだCSVデータが文字列として渡される
