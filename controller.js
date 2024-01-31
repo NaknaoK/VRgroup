@@ -28,7 +28,7 @@ async function init() {
   
   // シーンの作成
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color( 0x000000 );
+  scene.background = new THREE.Color( 0xe0e0e0 );
   
   // レンダラーの作成
   const renderer = new THREE.WebGLRenderer({
@@ -251,10 +251,10 @@ async function init() {
   cameraContainer.add( controllerGrip2 );
   //コントローラーから出る光線の作成
   const geo = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 )]);
-  const mat = new THREE.LineBasicMaterial({color: 0xff0000});
+  const mat = new THREE.LineBasicMaterial({color: 0x008000});
   const line = new THREE.Line( geo , mat );
   line.name = 'line';
-  line.scale.z = 1;//光線の長さ
+  line.scale.z = 10;//光線の長さ
   controller1.add( line.clone() );
   controller2.add( line.clone() );
   
@@ -324,10 +324,10 @@ async function init() {
 //追加 阿部 事故を表すオブジェクトの生成
 function createAccidentPoint(posX, posZ) {
   const geometry = new THREE.BoxGeometry(3,3,3);
-  const material = new THREE.MeshBasicMaterial({color: 0xF4E511});
+  const material = new THREE.MeshBasicMaterial({color: 0xFF0000});
   const cube = new THREE.Mesh(geometry, material);
   cube.position.set(posX, 200, posZ);
-  const ray = new THREE.Mesh(new THREE.CylinderGeometry(1,1,200),new THREE.MeshPhongMaterial({color: 0xF4E511}));
+  const ray = new THREE.Mesh(new THREE.CylinderGeometry(1,1,200),new THREE.MeshPhongMaterial({color: 0xFF0000}));
   ray.material.transparent = true;
   ray.position.set(posX, 100, posZ);
   accidentGroup.add(ray);
