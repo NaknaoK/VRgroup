@@ -323,11 +323,11 @@ async function init() {
   /* ----コントローラー設定----- */
 //追加 阿部 事故を表すオブジェクトの生成
 function createAccidentPoint(posX, posZ) {
-  const geometry = new THREE.BoxGeometry(1,1,1);
+  const geometry = new THREE.BoxGeometry(3,3,3);
   const material = new THREE.MeshBasicMaterial({color: 0xF4E511});
   const cube = new THREE.Mesh(geometry, material);
   cube.position.set(posX, 200, posZ);
-  const ray = new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,200),new THREE.MeshPhongMaterial({color: 0xF4E511}));
+  const ray = new THREE.Mesh(new THREE.CylinderGeometry(1,1,200),new THREE.MeshPhongMaterial({color: 0xF4E511}));
   ray.material.transparent = true;
   ray.position.set(posX, 100, posZ);
   accidentGroup.add(ray);
