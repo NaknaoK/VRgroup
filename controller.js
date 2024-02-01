@@ -9,7 +9,7 @@ import { XRControllerModelFactory } from 'https://unpkg.com/three@0.150.1/exampl
 //PC上で滑らかにカメラコントローラーを制御する為に使用↓
 import { OrbitControls } from 'https://unpkg.com/three@0.150.1/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-let controller1, controller2;
+let controller1, controller2;//1が左手、2が右手
 let controllerGrip1, controllerGrip2;
 
 
@@ -28,7 +28,7 @@ async function init() {
   
   // シーンの作成
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color( 0xe0e0e0 );
+  scene.background = new THREE.Color( 0xe0ffff );
   
   // レンダラーの作成
   const renderer = new THREE.WebGLRenderer({
@@ -45,10 +45,11 @@ async function init() {
   const camera = new THREE.PerspectiveCamera(90, width / height);
   //CSVデータを格納するやつら
   let trafficAccident = [];
+  let trafficVolume = [];
   
   // カメラ用コンテナを作成(3Dのカメラを箱に入れて箱自体を動かす) 
   const cameraContainer = new THREE.Object3D();
-  cameraContainer.position.set( 20, 30, 0 );
+  cameraContainer.position.set( 2, 200, 5 );
   cameraContainer.add(camera);
   scene.add(cameraContainer);
   
@@ -74,9 +75,6 @@ async function init() {
 		const light = new THREE.DirectionalLight( 0xffffff, 2.5);
 		light.position.set( 200, 400, 200 );
 		scene.add( light );
-    const pointLight = new THREE.PointLight(0xffffff, 1);
-    pointLight.position.set( -400, 400, -100 );
-    scene.add(pointLight);
   }
   /* ----基本的な設定----- */
   /* ----Map関係---- */
@@ -100,7 +98,7 @@ async function init() {
   mapGroup.add(model4);
   scene.add(mapGroup);
   //mapの大きさ0.01倍
-  mapGroup.scale.set(1, 1, -1);
+  mapGroup.scale.set(1, 1, -1);//z軸が反転してしまうため行う
 
   /* ----Map関係---- */
   /* ----CSV関係---- */
@@ -112,7 +110,7 @@ async function init() {
   var accidentGroup = new THREE.Group();
   // レスポンスが返ってきたらconvertCSVtoArray()を呼ぶ	
   req1.onload = function(){
-	  convertCSVtoArray(req1.responseText); // 渡されるのは読み込んだCSVデータ
+	  convertCSVtoArrayAccident(req1.responseText); // 渡されるのは読み込んだCSVデータ
     // console.log(trafficAccident[1][1]);
     // 追加 阿部
     for(let i = 1; i < trafficAccident.length; i++){
@@ -140,15 +138,16 @@ async function init() {
               }
               const posX = num2*leverage2-1;//経度からポジションを計算
               const posZ = num1*leverage1;//緯度からポジションを計算
-              createAccidentPoint(posX, posZ);
+              createAccidentPoint(posX, posZ, i);
               console.log(posX +"  "+posZ);
             }
           }
         }
     }
     
-    createAccidentPoint(0, 0);
+    createAccidentPoint(0, 0, 100);
     scene.add(accidentGroup);
+    console.log(accidentGroup);
     // createTrafficVolumeObject(5, 1, 0, 0, 0, 0, 0, trafficAccident[1][4]); //テストとして事故のデータを渡しているが、運用時は交通量に変更
   }
   
@@ -156,9 +155,10 @@ async function init() {
   req2.open("get", "zkntrf13.csv", true); // アクセスするファイルを指定
   req2.overrideMimeType("text/plain; charset=Shift_JIS");//文字コードの上書き
   req2.send(null); // HTTPリクエストの発行
-  var trafficVolume = new THREE.Group();
+  var volumeGroup = new THREE.Group();
   req2.onload = function(){
-    console.log("aaasasassasa");
+    convertCSVtoArrayVolume(req2.responseText);
+    console.log(trafficVolume[3][3]);
   }
 
 
@@ -179,11 +179,18 @@ async function init() {
     }
   }
 
-  function convertCSVtoArray(str){ // 読み込んだCSVデータが文字列として渡される
+  function convertCSVtoArrayAccident(str){ // 読み込んだCSVデータが文字列として渡される
     let tmp = str.split("\n"); // 改行を区切り文字として行を要素とした配列を生成
     //各行ごとにカンマで区切った文字列を要素とした二次元配列を生成
     for(var i=0;i<tmp.length;++i){
       trafficAccident[i] = tmp[i].split(',');
+    }
+  }
+  function convertCSVtoArrayVolume(str){ // 読み込んだCSVデータが文字列として渡される
+    let tmp = str.split("\n"); // 改行を区切り文字として行を要素とした配列を生成
+    //各行ごとにカンマで区切った文字列を要素とした二次元配列を生成
+    for(var i=0;i<tmp.length;++i){
+      trafficVolume[i] = tmp[i].split(',');
     }
   }
   /* ----CSV関係---- */
@@ -221,7 +228,7 @@ async function init() {
   });
   controller1.addEventListener( 'connected', ( event )=> {
     if('gamepad' in event.data){
-        if('axes' in event.data.gamepad){ //we have a modern controller
+        if('axes' in event.data.gamepad){
           controller1.gamepad = event.data.gamepad;
           VRconnect = true;
         }
@@ -235,7 +242,7 @@ async function init() {
   controller2.addEventListener('squeezeend', onSqueezeEnd);
   controller2.addEventListener( 'connected', ( event )=> {
     if('gamepad' in event.data){
-        if('axes' in event.data.gamepad){ //we have a modern controller
+        if('axes' in event.data.gamepad){
           controller2.gamepad = event.data.gamepad;
         }
     }
@@ -251,7 +258,7 @@ async function init() {
   cameraContainer.add( controllerGrip2 );
   //コントローラーから出る光線の作成
   const geo = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 )]);
-  const mat = new THREE.LineBasicMaterial({color: 0x008000});
+  const mat = new THREE.LineBasicMaterial({color: 0xf5f5f5});
   const line = new THREE.Line( geo , mat );
   line.name = 'line';
   line.scale.z = 10;//光線の長さ
@@ -259,7 +266,6 @@ async function init() {
   controller2.add( line.clone() );
   
 
-  let xx = 0,yy = 100;
   //機能
 	function handleController1( controller ) {//controller1の処理
 		const userData = controller.userData;
@@ -270,17 +276,11 @@ async function init() {
         cameraContainer.position.y += controllerData.buttons[0].value;
       }else if(controllerData.buttons[1].pressed == true){
         cameraContainer.position.y -= controllerData.buttons[1].value;
-        xx = 50;
       }else if(controllerData.buttons[2].pressed == true){
-        xx = 150;
       }else if(controllerData.buttons[3].pressed == true){
-        xx = 250;
       }else if(controllerData.buttons[4].pressed == true){
-        xx = 350;
       }else if(controllerData.buttons[5].pressed == true){
-        xx = 450;
       }else if(controllerData.buttons[6].pressed == true){
-        xx = 550;
       }
 		} else {
       let cameraRotation = camera.rotation;
@@ -299,59 +299,100 @@ async function init() {
   function handleController2( controller ) {//controller2の処理
     const controllerData = controller.gamepad;
     if(controllerData.buttons[0].pressed == true){
-      yy = 50;
+      // レイと交差しているシェイプの取得
+      const intersections = getIntersections(controller);
+      if(intersections.length > 0){//一つ以上交差している時処理する
+        const intersection = intersections[0];
+        const object = intersection.object;
+        object.material.emissive.b = 1;
+        intersected.push(object);
+        console.log(object.name);
+      }
+      // console.log(intersections);
     }else if(controllerData.buttons[1].pressed == true){
-      yy = 75;
     }else if(controllerData.buttons[2].pressed == true){
-      yy = 125;
     }else if(controllerData.buttons[3].pressed == true){
-      yy = 150;
     }else if(controllerData.buttons[4].pressed == true){
-      yy = 175;
     }else if(controllerData.buttons[5].pressed == true){
-      yy = 200;
     }else if(controllerData.buttons[6].pressed == true){
-      yy = 225;
     }
   }
   // 移動関数
-    function move(orientation , speed) {
-      const direction = new THREE.Vector3(controller1.gamepad.axes[2], 0, controller1.gamepad.axes[3]);
-      direction.applyQuaternion(new THREE.Quaternion(0, orientation.y, 0));
-      cameraContainer.position.addScaledVector(direction, speed);
-    }
+  function move(orientation , speed) {
+    const direction = new THREE.Vector3(controller1.gamepad.axes[2], 0, controller1.gamepad.axes[3]);
+    direction.applyQuaternion(new THREE.Quaternion(0, orientation.y, 0));
+    cameraContainer.position.addScaledVector(direction, speed);
+  }
   /* ----コントローラー設定----- */
 //追加 阿部 事故を表すオブジェクトの生成
-function createAccidentPoint(posX, posZ) {
+function createAccidentPoint(posX, posZ, num) {
   const geometry = new THREE.BoxGeometry(3,3,3);
-  const material = new THREE.MeshBasicMaterial({color: 0xFF0000});
+  const material = new THREE.MeshLambertMaterial({color: 0xffd700});
   const cube = new THREE.Mesh(geometry, material);
   cube.position.set(posX, 200, posZ);
-  const ray = new THREE.Mesh(new THREE.CylinderGeometry(1,1,200),new THREE.MeshPhongMaterial({color: 0xFF0000}));
+  cube.name = num;
+  const ray = new THREE.Mesh(new THREE.CylinderGeometry(1,1,200),new THREE.MeshPhongMaterial({color: 0xFFd700}));
   ray.material.transparent = true;
   ray.position.set(posX, 100, posZ);
+  ray.name = num;
   accidentGroup.add(ray);
   accidentGroup.add(cube);
+  console.log(accidentGroup);
 }
 
 //追加 阿部 交通量を表すオブジェクトの生成
 function createTrafficVolumeObject(sizeX, sizeZ, posX, posY, posZ, rotX, rotY, trafficVolume){
   const geometry = new THREE.BoxGeometry(sizeX,1,sizeZ);
-  let material = new THREE.MeshBasicMaterial({color: 0x0067C0}); //交通量が最低領域の場合の色を設定
+  let material = new THREE.MeshLambertMaterial({color: 0x0067C0}); //交通量が最低領域の場合の色を設定
   //交通量が多い場合は交通量の値が含まれる領域に応じて色を変更
   if(trafficVolume >= 2){ //領域（仮の値）
-    material = new THREE.MeshBasicMaterial({color: 0xED1A3D});
+    material = new THREE.MeshLambertMaterial({color: 0xED1A3D});
   }else if(trafficVolume >= 1){
-    material = new THREE.MeshBasicMaterial({color: 0xF58220});
+    material = new THREE.MeshLambertMaterial({color: 0xF58220});
   }
   const cube = new THREE.Mesh(geometry, material);
   cube.position.set(posX, posY, posZ);
   cube.rotation.set(rotX, rotY, 0);
   scene.add(cube);
 }
+/*--------↓接触処理----------*/
+  // レイと交差しているシェイプの一覧
+  const intersected = [];
+  // ワーク行列
+  const tempMatrix = new THREE.Matrix4();
 
+  // レイキャスターの準備
+  const raycaster = new THREE.Raycaster();
+  // レイと交差しているシェイプの取得
+  function getIntersections(controller) {
+    tempMatrix.identity().extractRotation(controller.matrixWorld);
+    raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+    raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+    return raycaster.intersectObjects(accidentGroup.children, false);
+  }
+  // シェイプとコントローラのレイの交差判定のクリア
+  function cleanIntersected() {
+    while (intersected.length) {
+      const object = intersected.pop();
+      object.material.emissive.b = 0;
 
-
+    }
+  }
+  // シェイプとコントローラのレイの交差判定
+  function intersectObjects(controller) {
+    // 選択時は無処理
+    if (controller.userData.selected !== undefined) return;
+    // レイと交差しているシェイプの取得
+    const intersections = getIntersections(controller);
+    if (intersections.length > 0) {
+      // 交差時はする
+      const intersection = intersections[0];
+      const object = intersection.object;
+      object.material.emissive.b = 0.5;
+      intersected.push(object);
+    }
+  }
+/*--------↑接触処理----------*/
   // レンダラーにループ関数を登録
   renderer.setAnimationLoop(tick);
   
@@ -359,6 +400,8 @@ function createTrafficVolumeObject(sizeX, sizeZ, posX, posY, posZ, rotX, rotY, t
   function tick() {
     // レンダリング
     if(VRconnect){
+      cleanIntersected();
+      intersectObjects( controller2 );
       handleController1( controller1 );
       handleController2( controller2 );
     }
