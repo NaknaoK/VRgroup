@@ -271,23 +271,24 @@ async function init() {
 const texts = ["Front", "Back", "Top", "Bottom", "交通量", "Right"];
 
 // マテリアルの設定
-let materials = [];
-for (let i = 0; i < 6; i++) {
-  if(i == 6){
-    const texture = new THREE.CanvasTexture(createTextCanvas(texts[i]));
-    materials.push(new THREE.MeshBasicMaterial({ map: texture }));
-  }else{
-    materials.push(new THREE.MeshLambertMaterial({color: 0x000000}));
-    materials[i].transparent = true;
-    materials[i].opacity = 0.5; 
-  }
-}
+// let materials = [];
+// for (let i = 0; i < 6; i++) {
+//   if(i == 6){
+//     const texture = new THREE.CanvasTexture(createTextCanvas(texts[i]));
+//     materials.push(new THREE.MeshBasicMaterial({ map: texture }));
+//   }else{
+  let materials =new THREE.MeshLambertMaterial({color: 0x000000});
+    // materials.push(new THREE.MeshLambertMaterial({color: 0x000000}));
+    // materials[i].transparent = true;
+    // materials[i].opacity = 0.5; 
+  // }
+// }
   let detailsObj = new THREE.Mesh(geometry, materials);
   detailsObj.position.set(0,0.1,0.05);
-  // detailsObj.material.transparent = true;
-  // detailsObj.material.opacity = 0.5; 
+  detailsObj.material.transparent = true;
+  detailsObj.material.opacity = 0.5; 
   controller2.add(detailsObj);
-  detailsObj.visible = true;
+  detailsObj.visible = false;
 
   // テキストを描画するCanvasを作成する関数
 function createTextCanvas(text) {
@@ -296,18 +297,18 @@ function createTextCanvas(text) {
   const context = canvas.getContext('2d', {willReadFrequently:true});
   // context.fillStyle = 'white';
   context.fillRect(0, 0, canvas.width, canvas.height);
-  context.font = '32px UTF-8';
+  context.font = '80px UTF-8';
   // context.fillStyle = 'black';
   context.textAlign = 'center';
-  context.textBaseline = 'middle';
+  context.textBaseline = 'top';
   let measure=context.measureText(text);
   canvas.width=measure.width;
-  canvas.height=measure.fontBoundingBoxAscent+measure.fontBoundingBoxDescent;
+  canvas.height=2*(measure.fontBoundingBoxAscent+measure.fontBoundingBoxDescent);
   console.log(context);
-  context.font = '32px UTF-8';
+  context.font = '16px UTF-8';
   // context.fillStyle = 'black';
   context.textAlign = 'center';
-  context.textBaseline = 'middle';
+  context.textBaseline = 'top';
   //透明にする
   context.globalCompositeOperation = 'destination-out';
   context.fillStyle="rgb(255,255,255)";
@@ -316,7 +317,11 @@ function createTextCanvas(text) {
   context.globalCompositeOperation = 'source-over';
   context.fillStyle='white';
   // context.fillText(text, canvas.width / 2, canvas.height / 2);
-  context.fillText(text,Math.abs(measure.actualBoundingBoxLeft),measure.actualBoundingBoxAscent);
+  const lines = text.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    context.fillText(lines[i],canvas.width / 2, canvas.height / 4 +i*30);
+  }
+  // context.fillText(text,Math.abs(measure.actualBoundingBoxLeft),measure.actualBoundingBoxAscent);
   let png=canvas.toDataURL('image/png');
   // return canvas;
   return {img:png, w:canvas.width, h:canvas.height};
@@ -369,13 +374,21 @@ function createTextCanvas(text) {
         }else if(object.geometry.type == 'CylinderGeometry'){//交通事故の処理
           object.material.color.g = 0.2;
           intersected.push(object);
-          // console.log(trafficAccident[0][7]);
+          console.log(trafficAccident[100]);
         }
         // console.log(object);
-        // if(!detailsObj.visible){
+        if(!detailsObj.visible){
           detailsObj.visible = true;
           //詳細表示の画像作成//////////////////////////////////////////////////////
-          const png = createTextCanvas(texts[4]);
+          const N = object.name;
+          let tet = "詳細\n";
+          if(object.geometry.type == 'BoxGeometry'){//交通量の処理
+          }else if(object.geometry.type == 'CylinderGeometry'){//交通事故の処理
+            const tetTime ="日時 "+trafficAccident[N][11]+"/"+trafficAccident[N][12]+"/"+trafficAccident[N][13]+" "+trafficAccident[N][14]+":"+trafficAccident[N][15];
+            tet = tet + tetTime;
+          }
+          // const tet = "道路\n番号"+"\n"+object.name;
+          const png = createTextCanvas(tet);
           const textureText = new THREE.TextureLoader().load( png.img );
           const materialText=new THREE.MeshBasicMaterial({
             color:0xffffff, map:textureText ,side:THREE.FrontSide,
@@ -392,12 +405,15 @@ function createTextCanvas(text) {
           // detailsObj.material[4] = mate;
           // materials[4].transparent = true;
           // materials[4].opacity = 1; 
-          // console.log
-        // }
+          console.log(tet)
+        }
       }
       // console.log(intersections);
     }else{//右コントローラのトリガーボタンが押されてない場合
-      detailsObj.visible = true;
+      if(detailsObj.children){
+        detailsObj.children.pop();
+      }
+      detailsObj.visible = false;
     }
   }
   // 移動関数
@@ -463,7 +479,9 @@ function createTrafficVolumeObject(sizeX, sizeZ, posX, posY, posZ, rotX, rotY, t
     while (intersected.length) {
       const object = intersected.pop();
       object.material.color.g = 0.85;
-
+    }
+    while(detailsObj.children.length>=2){
+      // object.;
     }
   }
   // シェイプとコントローラのレイの交差判定
