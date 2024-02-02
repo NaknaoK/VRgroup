@@ -147,7 +147,7 @@ async function init() {
     
     createAccidentPoint(0, 0, 100);
     scene.add(accidentGroup);
-    console.log(accidentGroup);
+    console.log(1);
     // createTrafficVolumeObject(5, 1, 0, 0, 0, 0, 0, trafficAccident[1][4]); //テストとして事故のデータを渡しているが、運用時は交通量に変更
   }
   
@@ -158,7 +158,7 @@ async function init() {
   var volumeGroup = new THREE.Group();
   req2.onload = function(){
     convertCSVtoArrayVolume(req2.responseText);
-    console.log(trafficVolume[3][3]);
+    console.log(2);
   }
 
 
@@ -268,10 +268,11 @@ async function init() {
   const geometry = new THREE.BoxGeometry(0.2,0.2,0.01);
   const material = new THREE.MeshLambertMaterial({color: 0x000000});
   const detailsObj = new THREE.Mesh(geometry, material);
-  detailsObj.position.set(0,0.1,0);
+  detailsObj.position.set(0,0.1,0.05);
   detailsObj.material.transparent = true;
   detailsObj.material.opacity = 0.5; 
   controller2.add(detailsObj);
+  detailsObj.visible = false;
   
 
   //機能
@@ -323,18 +324,15 @@ async function init() {
           console.log(trafficAccident[0][7]);
         }
         console.log(object);
-        // if(){
-
-        // }
-        
+        if(!detailsObj.visible){
+          detailsObj.visible = true;
+          //詳細表示の画像作成
+          
+        }
       }
       // console.log(intersections);
-    }else if(controllerData.buttons[1].pressed == true){
-    }else if(controllerData.buttons[2].pressed == true){
-    }else if(controllerData.buttons[3].pressed == true){
-    }else if(controllerData.buttons[4].pressed == true){
-    }else if(controllerData.buttons[5].pressed == true){
-    }else if(controllerData.buttons[6].pressed == true){
+    }else{//右コントローラのトリガーボタンが押されてない場合
+      detailsObj.visible = false;
     }
   }
   // 移動関数
