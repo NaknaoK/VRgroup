@@ -265,14 +265,62 @@ async function init() {
   controller1.add( line.clone() );
   controller2.add( line.clone() );
   //詳細情報を表示する板
-  const geometry = new THREE.BoxGeometry(0.2,0.2,0.01);
-  const material = new THREE.MeshLambertMaterial({color: 0x000000});
-  const detailsObj = new THREE.Mesh(geometry, material);
+  let geometry = new THREE.BoxGeometry(0.2,0.2,0.01);
+  // let material = new THREE.MeshLambertMaterial({color: 0x000000});
+  // 各面に表示するテキスト
+const texts = ["Front", "Back", "Top", "Bottom", "交通量", "Right"];
+
+// マテリアルの設定
+let materials = [];
+for (let i = 0; i < 6; i++) {
+  if(i == 6){
+    const texture = new THREE.CanvasTexture(createTextCanvas(texts[i]));
+    materials.push(new THREE.MeshBasicMaterial({ map: texture }));
+  }else{
+    materials.push(new THREE.MeshLambertMaterial({color: 0x000000}));
+    materials[i].transparent = true;
+    materials[i].opacity = 0.5; 
+  }
+}
+  let detailsObj = new THREE.Mesh(geometry, materials);
   detailsObj.position.set(0,0.1,0.05);
-  detailsObj.material.transparent = true;
-  detailsObj.material.opacity = 0.5; 
+  // detailsObj.material.transparent = true;
+  // detailsObj.material.opacity = 0.5; 
   controller2.add(detailsObj);
-  detailsObj.visible = false;
+  detailsObj.visible = true;
+
+  // テキストを描画するCanvasを作成する関数
+function createTextCanvas(text) {
+  const canvas = document.createElement('canvas');
+  // const context = canvas.getContext('2d');
+  const context = canvas.getContext('2d', {willReadFrequently:true});
+  // context.fillStyle = 'white';
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.font = '32px UTF-8';
+  // context.fillStyle = 'black';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  let measure=context.measureText(text);
+  canvas.width=measure.width;
+  canvas.height=measure.fontBoundingBoxAscent+measure.fontBoundingBoxDescent;
+  console.log(context);
+  context.font = '32px UTF-8';
+  // context.fillStyle = 'black';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  //透明にする
+  context.globalCompositeOperation = 'destination-out';
+  context.fillStyle="rgb(255,255,255)";
+  context.fillRect(0,0,canvas.width,canvas.height);
+  //通常描画にする
+  context.globalCompositeOperation = 'source-over';
+  context.fillStyle='white';
+  // context.fillText(text, canvas.width / 2, canvas.height / 2);
+  context.fillText(text,Math.abs(measure.actualBoundingBoxLeft),measure.actualBoundingBoxAscent);
+  let png=canvas.toDataURL('image/png');
+  // return canvas;
+  return {img:png, w:canvas.width, h:canvas.height};
+}
   
 
   //機能
@@ -317,22 +365,39 @@ async function init() {
           object.material.opacity = 1;
           intersected.push(object);
           // console.log(trafficAccident[0][7]);
-          console.log(object);
+          // console.log(object);
         }else if(object.geometry.type == 'CylinderGeometry'){//交通事故の処理
           object.material.color.g = 0.2;
           intersected.push(object);
-          console.log(trafficAccident[0][7]);
+          // console.log(trafficAccident[0][7]);
         }
-        console.log(object);
-        if(!detailsObj.visible){
+        // console.log(object);
+        // if(!detailsObj.visible){
           detailsObj.visible = true;
-          //詳細表示の画像作成
-          
-        }
+          //詳細表示の画像作成//////////////////////////////////////////////////////
+          const png = createTextCanvas(texts[4]);
+          const textureText = new THREE.TextureLoader().load( png.img );
+          const materialText=new THREE.MeshBasicMaterial({
+            color:0xffffff, map:textureText ,side:THREE.FrontSide,
+            transparent:true, opacity:1.0,
+          });
+          //平面ジオメトリの作成
+          const planeGeo=new THREE.PlaneGeometry(png.w/1000, png.h/1000,1,1);
+          //メッシュの作成
+          const meshText=new THREE.Mesh(planeGeo,materialText);
+          meshText.position.set(0, 0.01, 0.02);
+          detailsObj.add(meshText);
+          // const texture = new THREE.CanvasTexture(createTextCanvas(texts[4]));
+          // const mate = new THREE.MeshBasicMaterial({ map: texture });
+          // detailsObj.material[4] = mate;
+          // materials[4].transparent = true;
+          // materials[4].opacity = 1; 
+          // console.log
+        // }
       }
       // console.log(intersections);
     }else{//右コントローラのトリガーボタンが押されてない場合
-      detailsObj.visible = false;
+      detailsObj.visible = true;
     }
   }
   // 移動関数
