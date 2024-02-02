@@ -264,6 +264,14 @@ async function init() {
   line.scale.z = 10;//光線の長さ
   controller1.add( line.clone() );
   controller2.add( line.clone() );
+  //詳細情報を表示する板
+  const geometry = new THREE.BoxGeometry(0.2,0.2,0.01);
+  const material = new THREE.MeshLambertMaterial({color: 0x000000});
+  const detailsObj = new THREE.Mesh(geometry, material);
+  detailsObj.position.set(0,0.1,0);
+  detailsObj.material.transparent = true;
+  detailsObj.material.opacity = 0.5; 
+  controller2.add(detailsObj);
   
 
   //機能
@@ -304,9 +312,21 @@ async function init() {
       if(intersections.length > 0){//一つ以上交差している時処理する
         const intersection = intersections[0];
         const object = intersection.object;
-        object.material.emissive.b = 1;
-        intersected.push(object);
-        console.log(object.name);
+        if(object.geometry.type == 'BoxGeometry'){//交通量の処理
+          object.material.opacity = 1;
+          intersected.push(object);
+          // console.log(trafficAccident[0][7]);
+          console.log(object);
+        }else if(object.geometry.type == 'CylinderGeometry'){//交通事故の処理
+          object.material.color.g = 0.2;
+          intersected.push(object);
+          console.log(trafficAccident[0][7]);
+        }
+        console.log(object);
+        // if(){
+
+        // }
+        
       }
       // console.log(intersections);
     }else if(controllerData.buttons[1].pressed == true){
@@ -326,18 +346,23 @@ async function init() {
   /* ----コントローラー設定----- */
 //追加 阿部 事故を表すオブジェクトの生成
 function createAccidentPoint(posX, posZ, num) {
-  const geometry = new THREE.BoxGeometry(3,3,3);
-  const material = new THREE.MeshLambertMaterial({color: 0xffd700});
-  const cube = new THREE.Mesh(geometry, material);
-  cube.position.set(posX, 200, posZ);
-  cube.name = num;
+  // var pin = new THREE.Group();
+  // const geometry = new THREE.BoxGeometry(3,3,3);
+  // const material = new THREE.MeshLambertMaterial({color: 0xffd700});
+  // const cube = new THREE.Mesh(geometry, material);
+  // cube.position.set(posX, 200, posZ);
+  // cube.name = num;
   const ray = new THREE.Mesh(new THREE.CylinderGeometry(1,1,200),new THREE.MeshPhongMaterial({color: 0xFFd700}));
   ray.material.transparent = true;
   ray.position.set(posX, 100, posZ);
   ray.name = num;
+  // pin.add(ray);
+  // pin.add(cube);
+  // pin.name = "pin";
+  // accidentGroup.add(pin);
   accidentGroup.add(ray);
-  accidentGroup.add(cube);
-  console.log(accidentGroup);
+  // accidentGroup.add(cube);
+  // console.log(accidentGroup);
 }
 
 //追加 阿部 交通量を表すオブジェクトの生成
@@ -374,7 +399,7 @@ function createTrafficVolumeObject(sizeX, sizeZ, posX, posY, posZ, rotX, rotY, t
   function cleanIntersected() {
     while (intersected.length) {
       const object = intersected.pop();
-      object.material.emissive.b = 0;
+      object.material.color.g = 0.85;
 
     }
   }
@@ -385,10 +410,10 @@ function createTrafficVolumeObject(sizeX, sizeZ, posX, posY, posZ, rotX, rotY, t
     // レイと交差しているシェイプの取得
     const intersections = getIntersections(controller);
     if (intersections.length > 0) {
-      // 交差時はする
+      // 交差時の処理
       const intersection = intersections[0];
       const object = intersection.object;
-      object.material.emissive.b = 0.5;
+      object.material.color.g = 0.4;
       intersected.push(object);
     }
   }
