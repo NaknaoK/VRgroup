@@ -402,7 +402,7 @@ function createTextCanvas(text) {
         const object = intersection.object;
         if(object.geometry.type == 'BoxGeometry'){//交通量の処理
           object.material.opacity = 0.4;
-          object.material.color.g = 0.2;
+          // object.material.color.g = 0.2;
           intersected.push(object);
           // console.log(trafficAccident[0][7]);
           // console.log(object);
@@ -698,7 +698,6 @@ function createTrafficVolumeObject(pos1Z, pos1X, pos2Z, pos2X, wid, num){//Road[
       if(object.geometry.type == 'BoxGeometry'){//交通量の処理
         object.material.color.g = 0;
         object.material.opacity = 0.7;
-        intersected.push(object);
       }else if(object.geometry.type == 'CylinderGeometry'){//交通事故の処理
         object.material.color.g = 0.85;
       }
