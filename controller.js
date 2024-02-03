@@ -596,8 +596,8 @@ function createTrafficVolumeObject(pos1Z, pos1X, pos2Z, pos2X, wid, num){//Road[
     material.color.g = 0;
     material.color.b = 1-(trafficNum/threshold);
   }
-  material.transparent = true;
-  material.opacity = 0.8;
+  // material.transparent = true;
+  // material.opacity = 0.8;
   const centerFor1Z = CenterLatitude-pos1Z;//中心からの距離、緯度（度）
   const centerFor1X = pos1X-CenterLongitude;//中心からの距離、経度（度）
   const centerFor2Z = CenterLatitude-pos2Z;//中心からの距離、緯度（度）
