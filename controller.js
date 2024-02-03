@@ -545,8 +545,8 @@ function createTextCanvas(text) {
       }
       detailsObj.visible = false;
     }
-    if(controllerData.buttons[0].pressed == true){
-
+    if(controllerData.buttons[4].pressed == true){
+      cameraContainer.position.y += controllerData.buttons[4].value;
     }
   }
   // 移動関数
