@@ -402,6 +402,7 @@ function createTextCanvas(text) {
         const object = intersection.object;
         if(object.geometry.type == 'BoxGeometry'){//交通量の処理
           object.material.opacity = 0.4;
+          object.material.color.g = 0.2;
           intersected.push(object);
           // console.log(trafficAccident[0][7]);
           // console.log(object);
@@ -419,8 +420,8 @@ function createTextCanvas(text) {
           if(object.geometry.type == 'BoxGeometry'){//交通量の処理
             tet = "交通量"+tet;
             const year = trafficVolume[N][7].slice(0 ,4);
-            const month = trafficVolume[N][7].slice(4 ,5);
-            const tetTime ="観測日時\n"+year+"年 "+month+"月";
+            const month = trafficVolume[N][7].slice(4 ,6);
+            const tetTime ="観測日時\n"+year+"/"+month;
             tet = tet + tetTime;
 
             let numCar = 0;
@@ -546,7 +547,7 @@ function createTextCanvas(text) {
       detailsObj.visible = false;
     }
     if(controllerData.buttons[3].pressed == true){
-      cameraContainer.position.y += controllerData.buttons[4].value;
+      cameraContainer.position.y += controllerData.buttons[3].value;
     }
   }
   // 移動関数
@@ -693,10 +694,14 @@ function createTrafficVolumeObject(pos1Z, pos1X, pos2Z, pos2X, wid, num){//Road[
   function cleanIntersected() {
     while (intersected.length) {
       const object = intersected.pop();
-      object.material.color.g = 0.85;
-    }
-    while(detailsObj.children.length>=2){
-      // object.;
+      
+      if(object.geometry.type == 'BoxGeometry'){//交通量の処理
+        object.material.color.g = 0;
+        object.material.opacity = 0.7;
+        intersected.push(object);
+      }else if(object.geometry.type == 'CylinderGeometry'){//交通事故の処理
+        object.material.color.g = 0.85;
+      }
     }
   }
   // シェイプとコントローラのレイの交差判定
