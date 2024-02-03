@@ -46,6 +46,8 @@ async function init() {
   //CSVデータを格納するやつら
   let trafficAccident = [];
   let trafficVolume = [];
+  let Road = [];
+  let worldTimer = 8;
   
   // カメラ用コンテナを作成(3Dのカメラを箱に入れて箱自体を動かす) 
   const cameraContainer = new THREE.Object3D();
@@ -53,8 +55,7 @@ async function init() {
   cameraContainer.add(camera);
   scene.add(cameraContainer);
   
-  //コントローラーのステック操作の閾値
-  const threshold = 0.1;
+  //コントローラーのステック操作
   let VRconnect = false;
 
   //マップのデータ
@@ -147,18 +148,44 @@ async function init() {
     
     createAccidentPoint(0, 0, 100);
     scene.add(accidentGroup);
-    console.log(1);
-    // createTrafficVolumeObject(5, 1, 0, 0, 0, 0, 0, trafficAccident[1][4]); //テストとして事故のデータを渡しているが、運用時は交通量に変更
+    // console.log(1);
+    
   }
   
-  var req2 = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
-  req2.open("get", "zkntrf13.csv", true); // アクセスするファイルを指定
-  req2.overrideMimeType("text/plain; charset=Shift_JIS");//文字コードの上書き
-  req2.send(null); // HTTPリクエストの発行
+  
   var volumeGroup = new THREE.Group();
-  req2.onload = function(){
-    convertCSVtoArrayVolume(req2.responseText);
-    console.log(2);
+  var req3 = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
+  req3.open("get", "LatitudeAndLongitudeOfRoad.csv", true); // アクセスするファイルを指定
+  req3.overrideMimeType("text/plain; charset=Shift_JIS");//文字コードの上書き
+  req3.send(null); // HTTPリクエストの発行
+  req3.onload = function(){
+    convertCSVtoArrayRoad(req3.responseText);
+    console.log(3);
+    var req2 = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
+    req2.open("get", "zkntrf13.csv", true); // アクセスするファイルを指定
+    req2.overrideMimeType("text/plain; charset=Shift_JIS");//文字コードの上書き
+    req2.send(null); // HTTPリクエストの発行
+    req2.onload = function(){
+      convertCSVtoArrayVolume(req2.responseText);
+      // console.log(Road);
+      
+      for(let i = 1; i < Road.length-1; i++){
+        // let roadNum = [];
+        // let roadCount = 0;
+        for(let j = 1; j < trafficVolume.length; j++){
+          if(Road[i][0] == trafficVolume[j][0] && Road[i][1] == trafficVolume[j][1]){
+            Road[i].push(j);
+          } 
+        }
+        createTrafficVolumeObject(Number(Road[i][2]), Number(Road[i][3]), Number(Road[i][4]), Number(Road[i][5]), Number(Road[i][6]),i); //pos1Z, pos1X, pos2Z, pos2X, num
+        // console.log(Road[i][6]);
+        // console.log(Road[i]);
+      }
+      
+      // createTrafficVolumeObject(100, 100, 0, 0, 0); //pos1X, pos1Z, pos2X, pos2Z, num
+    
+      scene.add(volumeGroup);
+    }
   }
 
 
@@ -191,6 +218,13 @@ async function init() {
     //各行ごとにカンマで区切った文字列を要素とした二次元配列を生成
     for(var i=0;i<tmp.length;++i){
       trafficVolume[i] = tmp[i].split(',');
+    }
+  }
+  function convertCSVtoArrayRoad(str){ // 読み込んだCSVデータが文字列として渡される
+    let tmp = str.split("\n"); // 改行を区切り文字として行を要素とした配列を生成
+    //各行ごとにカンマで区切った文字列を要素とした二次元配列を生成
+    for(var i=0;i<tmp.length;++i){
+      Road[i] = tmp[i].split(',');
     }
   }
   /* ----CSV関係---- */
@@ -284,9 +318,9 @@ const texts = ["Front", "Back", "Top", "Bottom", "交通量", "Right"];
   // }
 // }
   let detailsObj = new THREE.Mesh(geometry, materials);
-  detailsObj.position.set(0,0.1,0.05);
+  detailsObj.position.set(0,0.1,0.1);
   detailsObj.material.transparent = true;
-  detailsObj.material.opacity = 0.5; 
+  detailsObj.material.opacity = 0.7; 
   controller2.add(detailsObj);
   detailsObj.visible = false;
 
@@ -304,7 +338,7 @@ function createTextCanvas(text) {
   let measure=context.measureText(text);
   canvas.width=measure.width;
   canvas.height=2*(measure.fontBoundingBoxAscent+measure.fontBoundingBoxDescent);
-  console.log(context);
+  // console.log(context);
   context.font = '16px UTF-8';
   // context.fillStyle = 'black';
   context.textAlign = 'center';
@@ -319,7 +353,7 @@ function createTextCanvas(text) {
   // context.fillText(text, canvas.width / 2, canvas.height / 2);
   const lines = text.split('\n');
   for (let i = 0; i < lines.length; i++) {
-    context.fillText(lines[i],canvas.width / 2, canvas.height / 4 +i*30);
+    context.fillText(lines[i],canvas.width / 2, canvas.height / 4 +i*20);
   }
   // context.fillText(text,Math.abs(measure.actualBoundingBoxLeft),measure.actualBoundingBoxAscent);
   let png=canvas.toDataURL('image/png');
@@ -367,14 +401,14 @@ function createTextCanvas(text) {
         const intersection = intersections[0];
         const object = intersection.object;
         if(object.geometry.type == 'BoxGeometry'){//交通量の処理
-          object.material.opacity = 1;
+          object.material.opacity = 0.5;
           intersected.push(object);
           // console.log(trafficAccident[0][7]);
           // console.log(object);
         }else if(object.geometry.type == 'CylinderGeometry'){//交通事故の処理
           object.material.color.g = 0.2;
           intersected.push(object);
-          console.log(trafficAccident[100]);
+          // console.log(trafficAccident[100]);
         }
         // console.log(object);
         if(!detailsObj.visible){
@@ -383,10 +417,106 @@ function createTextCanvas(text) {
           const N = object.name;
           let tet = "詳細\n";
           if(object.geometry.type == 'BoxGeometry'){//交通量の処理
-          }else if(object.geometry.type == 'CylinderGeometry'){//交通事故の処理
-            const tetTime ="日時 "+trafficAccident[N][11]+"/"+trafficAccident[N][12]+"/"+trafficAccident[N][13]+" "+trafficAccident[N][14]+":"+trafficAccident[N][15];
+            tet = "交通量"+tet;
+            const year = trafficVolume[N][7].slice(0 ,4);
+            const month = trafficVolume[N][7].slice(4 ,5);
+            const tetTime ="観測日時\n"+year+"年 "+month+"月";
             tet = tet + tetTime;
+
+            let numCar = 0;
+            for(let i = 0; i < Road[N].length; i++){
+              const numCheck = Road[N][i];
+              if(typeof numCheck === 'number'){
+                let timer = 4+worldTimer;
+                numCar += parseInt(trafficVolume[numCheck][timer]);
+                // console.log(trafficNum);
+              }
+            }
+            tet = tet + "\n一時間当たりの台数\n"+numCar+"台";
+
+            const weather = trafficVolume[N][8];
+            if(weather==1) tet = tet + "\n天候  晴れ";
+            else if(weather==2) tet = tet + "\n天候  曇り";
+            else if(weather==3) tet = tet + "\n天候  雨";
+            else if(weather==4) tet = tet + "\n天候  霧";
+            else if(weather==5) tet = tet + "\n天候  雪";
+            else{tet = tet + "\n天候  不明";}
+            
+
+          }else if(object.geometry.type == 'CylinderGeometry'){//交通事故の処理
+            tet = "事故"+tet;
+            let day = trafficAccident[N][56];
+            switch (day) {
+              case 1:
+                day = "日";
+                break;
+              case 2:
+                day = "月";
+                break;
+              case 3:
+                day = "火";
+                break;
+              case 4:
+                day = "水";
+                break;
+              case 5:
+                day = "木";
+                break;
+              case 6:
+                day = "金";
+                break;
+              default:
+                day = "土";
+                break;
+            }
+            const tetTime ="日時 "+trafficAccident[N][11]+"/"+trafficAccident[N][12]+"/"+trafficAccident[N][13]+"("+day+") "+trafficAccident[N][14]+":"+trafficAccident[N][15];
+            tet = tet + tetTime;
+
+            const weather = trafficAccident[N][17];
+            if(weather==1) tet = tet + "\n天候  晴れ";
+            else if(weather==2) tet = tet + "\n天候  曇り";
+            else if(weather==3) tet = tet + "\n天候  雨";
+            else if(weather==4) tet = tet + "\n天候  霧";
+            else{tet = tet + "\n天候  雪";}
+            
+            let kind = trafficAccident[N][33];
+            switch (kind) {
+              case 21:
+                tet = tet+"\n類型  車両同士";
+                break;
+              case 41:
+                tet = tet+"\n類型  車両単独";
+                break;
+              case 61:
+                tet = tet+"\n類型  列車";
+                break;
+              default:
+                tet = tet+"\n類型  人対車両";
+                break;
+            }
+
+            let pavement = trafficAccident[N][19];
+            switch (pavement) {
+              case 1:
+                tet = tet+"\n道路表面  乾燥している";
+                break;
+              case 2:
+                tet = tet+"\n道路表面  湿っている";
+                break;
+              case 3:
+                tet = tet+"\n道路表面  凍っている";
+                break;
+              case 4:
+                tet = tet+"\n道路表面  積雪";
+                break;
+              default:
+                tet = tet+"\n道路表面  舗装されていない";
+                break;
+            }
           }
+
+
+
           // const tet = "道路\n番号"+"\n"+object.name;
           const png = createTextCanvas(tet);
           const textureText = new THREE.TextureLoader().load( png.img );
@@ -405,7 +535,7 @@ function createTextCanvas(text) {
           // detailsObj.material[4] = mate;
           // materials[4].transparent = true;
           // materials[4].opacity = 1; 
-          console.log(tet)
+          // console.log(tet)
         }
       }
       // console.log(intersections);
@@ -414,6 +544,9 @@ function createTextCanvas(text) {
         detailsObj.children.pop();
       }
       detailsObj.visible = false;
+    }
+    if(controllerData.buttons[0].pressed == true){
+
     }
   }
   // 移動関数
@@ -443,21 +576,82 @@ function createAccidentPoint(posX, posZ, num) {
   // accidentGroup.add(cube);
   // console.log(accidentGroup);
 }
-
+const threshold = 3000;//閾値
 //追加 阿部 交通量を表すオブジェクトの生成
-function createTrafficVolumeObject(sizeX, sizeZ, posX, posY, posZ, rotX, rotY, trafficVolume){
-  const geometry = new THREE.BoxGeometry(sizeX,1,sizeZ);
-  let material = new THREE.MeshLambertMaterial({color: 0x0067C0}); //交通量が最低領域の場合の色を設定
-  //交通量が多い場合は交通量の値が含まれる領域に応じて色を変更
-  if(trafficVolume >= 2){ //領域（仮の値）
-    material = new THREE.MeshLambertMaterial({color: 0xED1A3D});
-  }else if(trafficVolume >= 1){
-    material = new THREE.MeshLambertMaterial({color: 0xF58220});
+function createTrafficVolumeObject(pos1Z, pos1X, pos2Z, pos2X, wid, num){//Road[i][3], Road[i][2], Road[i][5], Road[i][4], Road[i][6],i
+  let trafficNum = 0;
+  for(let i = 0; i < Road[num].length; i++){
+    const numCheck = Road[num][i];
+    if(typeof numCheck === 'number'){
+      let timer = 4+worldTimer;
+      trafficNum += parseInt(trafficVolume[numCheck][timer]);
+      // console.log(trafficNum);
+    }
   }
+ 
+  //交通量が少ない場合は交通量の値が含まれる領域に応じて色を変更
+  let material = new THREE.MeshLambertMaterial({color: 0xff0000}); //交通量が最低領域の場合の色を設定
+  if(trafficNum < threshold){ //領域（仮の値）
+    material.color.r = trafficNum/threshold;
+    material.color.g = 0;
+    material.color.b = 1-(trafficNum/threshold);
+  }
+  material.transparent = true;
+  material.opacity = 0.8;
+  const centerFor1Z = CenterLatitude-pos1Z;//中心からの距離、緯度（度）
+  const centerFor1X = pos1X-CenterLongitude;//中心からの距離、経度（度）
+  const centerFor2Z = CenterLatitude-pos2Z;//中心からの距離、緯度（度）
+  const centerFor2X = pos2X-CenterLongitude;//中心からの距離、経度（度）
+  let leverage1Z = 0;//
+  let leverage1X = 0;//
+  let leverage2Z = 0;//
+  let leverage2X = 0;//
+  //オブジェクトの中心がずれているため、正負によって処理を変える
+  //※jsのZ軸は北が負、南が正（EUSになってる）※
+  if(centerFor1Z<0){//中心より北にある
+    leverage1Z = 484/(North-CenterLatitude);//
+  }else{//中心より南にある
+    leverage1Z = 478/(CenterLatitude-South);//
+  }
+  if(centerFor1X<0){//中心より西にある
+    leverage1X = 585/(CenterLongitude-West);//
+  }else{//中心より東にある
+    leverage1X = 575/(East-CenterLongitude);//
+  }
+  if(centerFor2Z<0){//中心より北にある
+    leverage2Z = 484/(North-CenterLatitude);//
+  }else{//中心より南にある
+    leverage2Z = 478/(CenterLatitude-South);//
+  }
+  if(centerFor2X<0){//中心より西にある
+    leverage2X = 585/(CenterLongitude-West);//
+  }else{//中心より東にある
+    leverage2X = 575/(East-CenterLongitude);//
+  }
+  console.log(centerFor1X);
+  console.log(leverage1X);
+  const posAX =centerFor1X*leverage1X;//経度からポジションを計算
+  const posAZ =centerFor1Z*leverage1Z;//緯度からポジションを計算
+  const posBX =centerFor2X*leverage2X;//経度からポジションを計算
+  const posBZ =centerFor2Z*leverage2Z;//緯度からポジションを計算
+
+  let pointA = new THREE.Vector3(posAX, 2, posAZ);
+  let pointB = new THREE.Vector3(posBX, 2, posBZ);
+  // let pointA = new THREE.Vector3(500, 100, 475);
+  // let pointB = new THREE.Vector3(0, 100, 0);
+  let direction = new THREE.Vector3().copy(pointB).sub(pointA);
+  
+  let lenge = direction.length();
+  direction.normalize();
+  console.log(lenge);
+  const geometry = new THREE.BoxGeometry(wid*3,5,lenge);
   const cube = new THREE.Mesh(geometry, material);
-  cube.position.set(posX, posY, posZ);
-  cube.rotation.set(rotX, rotY, 0);
-  scene.add(cube);
+  cube.position.copy(pointA).add(direction.clone().multiplyScalar(lenge / 2));
+  cube.lookAt(pointB);
+  cube.name = num;
+  // cube.rotation.set(rotX, rotY, 0);
+  volumeGroup.add(cube);
+  console.log(volumeGroup);
 }
 /*--------↓接触処理----------*/
   // レイと交差しているシェイプの一覧
@@ -474,6 +668,20 @@ function createTrafficVolumeObject(sizeX, sizeZ, posX, posY, posZ, rotX, rotY, t
     raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
     return raycaster.intersectObjects(accidentGroup.children, false);
   }
+
+  //
+  // var clock = 0;
+  // function timeKeeper(){
+  //   if(worldTimer > 30){
+  //     worldTimer = worldTimer%24;
+  //   }else if(worldTimer < 7){
+  //     worldTimer = 30 - (7-worldTimer);
+  //   }
+  //   clock++;
+  //   worldTimer += clock/100;
+  //   console.log(clock);
+  // }
+
   // シェイプとコントローラのレイの交差判定のクリア
   function cleanIntersected() {
     while (intersected.length) {
@@ -499,6 +707,7 @@ function createTrafficVolumeObject(sizeX, sizeZ, posX, posY, posZ, rotX, rotY, t
     }
   }
 /*--------↑接触処理----------*/
+
   // レンダラーにループ関数を登録
   renderer.setAnimationLoop(tick);
   
@@ -507,6 +716,7 @@ function createTrafficVolumeObject(sizeX, sizeZ, posX, posY, posZ, rotX, rotY, t
     // レンダリング
     if(VRconnect){
       cleanIntersected();
+      // timeKeeper();
       intersectObjects( controller2 );
       handleController1( controller1 );
       handleController2( controller2 );
