@@ -187,7 +187,7 @@ async function init() {
       scene.add(volumeGroup);
     }
   }
-
+  var groupsToIntersect = [accidentGroup,volumeGroup];
 
   function convertLatitudeAndLongitude(str){ //度分秒から度に変換する
     let strCount = str.toString().length;
@@ -330,7 +330,7 @@ function createTextCanvas(text) {
   // const context = canvas.getContext('2d');
   const context = canvas.getContext('2d', {willReadFrequently:true});
   // context.fillStyle = 'white';
-  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.fillRect(0, 0, detailsObj.width, detailsObj.height);
   context.font = '80px UTF-8';
   // context.fillStyle = 'black';
   context.textAlign = 'center';
@@ -396,19 +396,19 @@ function createTextCanvas(text) {
     const controllerData = controller.gamepad;
     if(controllerData.buttons[0].pressed == true){
       // レイと交差しているシェイプの取得
-      const intersections = getIntersections(controller);
+      const intersections = getIntersectionsAccident(controller);
       if(intersections.length > 0){//一つ以上交差している時処理する
         const intersection = intersections[0];
         const object = intersection.object;
         if(object.geometry.type == 'BoxGeometry'){//交通量の処理
-          object.material.opacity = 0.5;
+          object.material.opacity = 0.4;
           intersected.push(object);
           // console.log(trafficAccident[0][7]);
           // console.log(object);
         }else if(object.geometry.type == 'CylinderGeometry'){//交通事故の処理
           object.material.color.g = 0.2;
           intersected.push(object);
-          // console.log(trafficAccident[100]);
+          console.log(intersection);
         }
         // console.log(object);
         if(!detailsObj.visible){
@@ -447,22 +447,22 @@ function createTextCanvas(text) {
             tet = "事故"+tet;
             let day = trafficAccident[N][56];
             switch (day) {
-              case 1:
+              case '1':
                 day = "日";
                 break;
-              case 2:
+              case '2':
                 day = "月";
                 break;
-              case 3:
+              case '3':
                 day = "火";
                 break;
-              case 4:
+              case '4':
                 day = "水";
                 break;
-              case 5:
+              case '5':
                 day = "木";
                 break;
-              case 6:
+              case '6':
                 day = "金";
                 break;
               default:
@@ -481,13 +481,13 @@ function createTextCanvas(text) {
             
             let kind = trafficAccident[N][33];
             switch (kind) {
-              case 21:
+              case '21':
                 tet = tet+"\n類型  車両同士";
                 break;
-              case 41:
+              case '41':
                 tet = tet+"\n類型  車両単独";
                 break;
-              case 61:
+              case '61':
                 tet = tet+"\n類型  列車";
                 break;
               default:
@@ -497,16 +497,16 @@ function createTextCanvas(text) {
 
             let pavement = trafficAccident[N][19];
             switch (pavement) {
-              case 1:
+              case '1':
                 tet = tet+"\n道路表面  乾燥している";
                 break;
-              case 2:
+              case '2':
                 tet = tet+"\n道路表面  湿っている";
                 break;
-              case 3:
+              case '3':
                 tet = tet+"\n道路表面  凍っている";
                 break;
-              case 4:
+              case '4':
                 tet = tet+"\n道路表面  積雪";
                 break;
               default:
@@ -545,7 +545,7 @@ function createTextCanvas(text) {
       }
       detailsObj.visible = false;
     }
-    if(controllerData.buttons[4].pressed == true){
+    if(controllerData.buttons[3].pressed == true){
       cameraContainer.position.y += controllerData.buttons[4].value;
     }
   }
@@ -596,8 +596,6 @@ function createTrafficVolumeObject(pos1Z, pos1X, pos2Z, pos2X, wid, num){//Road[
     material.color.g = 0;
     material.color.b = 1-(trafficNum/threshold);
   }
-  // material.transparent = true;
-  // material.opacity = 0.8;
   const centerFor1Z = CenterLatitude-pos1Z;//中心からの距離、緯度（度）
   const centerFor1X = pos1X-CenterLongitude;//中心からの距離、経度（度）
   const centerFor2Z = CenterLatitude-pos2Z;//中心からの距離、緯度（度）
@@ -646,12 +644,14 @@ function createTrafficVolumeObject(pos1Z, pos1X, pos2Z, pos2X, wid, num){//Road[
   console.log(lenge);
   const geometry = new THREE.BoxGeometry(wid*3,5,lenge);
   const cube = new THREE.Mesh(geometry, material);
+  cube.material.transparent = true;
+  cube.material.opacity = 0.7;
   cube.position.copy(pointA).add(direction.clone().multiplyScalar(lenge / 2));
   cube.lookAt(pointB);
   cube.name = num;
   // cube.rotation.set(rotX, rotY, 0);
   volumeGroup.add(cube);
-  console.log(volumeGroup);
+  // console.log(volumeGroup);
 }
 /*--------↓接触処理----------*/
   // レイと交差しているシェイプの一覧
@@ -662,12 +662,19 @@ function createTrafficVolumeObject(pos1Z, pos1X, pos2Z, pos2X, wid, num){//Road[
   // レイキャスターの準備
   const raycaster = new THREE.Raycaster();
   // レイと交差しているシェイプの取得
-  function getIntersections(controller) {
+  function getIntersectionsAccident(controller) {
     tempMatrix.identity().extractRotation(controller.matrixWorld);
     raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
     raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-    return raycaster.intersectObjects(accidentGroup.children, false);
+    return raycaster.intersectObjects(groupsToIntersect, true);
   }
+
+  // function getIntersectionsVolume(controller) {
+  //   tempMatrix.identity().extractRotation(controller.matrixWorld);
+  //   raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+  //   raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+  //   return raycaster.intersectObjects(volumeGroup.children, false);
+  // }
 
   //
   // var clock = 0;
@@ -697,7 +704,7 @@ function createTrafficVolumeObject(pos1Z, pos1X, pos2Z, pos2X, wid, num){//Road[
     // 選択時は無処理
     if (controller.userData.selected !== undefined) return;
     // レイと交差しているシェイプの取得
-    const intersections = getIntersections(controller);
+    const intersections = getIntersectionsAccident(controller);
     if (intersections.length > 0) {
       // 交差時の処理
       const intersection = intersections[0];
