@@ -372,16 +372,16 @@ function createTextCanvas(text) {
         cameraContainer.position.y += controllerData.buttons[0].value;
       }else if(controllerData.buttons[1].pressed == true){//スクイーズボタン
         cameraContainer.position.y -= controllerData.buttons[1].value;
-      }else if(controllerData.buttons[2].pressed == true){
-        cameraContainer.position.x -= controllerData.buttons[1].value;
-      }else if(controllerData.buttons[3].pressed == true){
-        cameraContainer.position.x -= controllerData.buttons[1].value;
-      }else if(controllerData.buttons[4].pressed == true){
-        cameraContainer.position.z -= controllerData.buttons[1].value;
-      }else if(controllerData.buttons[5].pressed == true){
-        cameraContainer.position.z -= controllerData.buttons[1].value;
-      }else if(controllerData.buttons[6].pressed == true){
-        cameraContainer.position.y -= controllerData.buttons[1].value;
+      }else if(controllerData.buttons[2].pressed == true){//
+        cameraContainer.position.x -= controllerData.buttons[2].value;
+      }else if(controllerData.buttons[3].pressed == true){//
+        cameraContainer.position.x += controllerData.buttons[3].value;
+      }else if(controllerData.buttons[4].pressed == true){//
+        cameraContainer.position.z -= controllerData.buttons[4].value;
+      }else if(controllerData.buttons[5].pressed == true){//
+        cameraContainer.position.z += controllerData.buttons[5].value;
+      }else if(controllerData.buttons[6].pressed == true){//
+        cameraContainer.position.y -= controllerData.buttons[6].value;
       }
 		} else {
       let cameraRotation = camera.rotation;
