@@ -51,7 +51,7 @@ async function init() {
   
   // カメラ用コンテナを作成(3Dのカメラを箱に入れて箱自体を動かす) 
   const cameraContainer = new THREE.Object3D();
-  cameraContainer.position.set( 2, 200, 5 );
+  cameraContainer.position.set( 2, 20, 5 );
   cameraContainer.add(camera);
   scene.add(cameraContainer);
   
@@ -253,13 +253,13 @@ async function init() {
   controller1.addEventListener( 'selectend', onSelectEnd );
   controller1.addEventListener('squeezestart', onSqueezeStart);
   controller1.addEventListener('squeezeend', onSqueezeEnd);
-  controller1.addEventListener('gamepadconnected', (event) => {
-    const gamepad = event.gamepad;
-    // サムスティックの変更があったときの処理
-    controller1.userData.isSelecting = true;
-    cameraContainer.position.x -= 0.1;
-    // ここでサムスティックの値に基づいた処理を実装
-  });
+  // controller1.addEventListener('gamepadconnected', (event) => {
+  //   const gamepad = event.gamepad;
+  //   // サムスティックの変更があったときの処理
+  //   controller1.userData.isSelecting = true;
+  //   cameraContainer.position.x -= 0.1;
+  //   // ここでサムスティックの値に基づいた処理を実装
+  // });
   controller1.addEventListener( 'connected', ( event )=> {
     if('gamepad' in event.data){
         if('axes' in event.data.gamepad){
@@ -302,7 +302,7 @@ async function init() {
   let geometry = new THREE.BoxGeometry(0.2,0.2,0.01);
   // let material = new THREE.MeshLambertMaterial({color: 0x000000});
   // 各面に表示するテキスト
-const texts = ["Front", "Back", "Top", "Bottom", "交通量", "Right"];
+// const texts = ["Front", "Back", "Top", "Bottom", "交通量", "Right"];
 
 // マテリアルの設定
 // let materials = [];
@@ -343,11 +343,11 @@ function createTextCanvas(text) {
   // context.fillStyle = 'black';
   context.textAlign = 'center';
   context.textBaseline = 'top';
-  //透明にする
-  context.globalCompositeOperation = 'destination-out';
-  context.fillStyle="rgb(255,255,255)";
-  context.fillRect(0,0,canvas.width,canvas.height);
-  //通常描画にする
+  // //透明にする
+  // context.globalCompositeOperation = 'destination-out';
+  // context.fillStyle="rgb(255,255,255)";
+  // context.fillRect(0,0,canvas.width,canvas.height);
+  // //通常描画にする
   context.globalCompositeOperation = 'source-over';
   context.fillStyle='white';
   // context.fillText(text, canvas.width / 2, canvas.height / 2);
@@ -368,15 +368,20 @@ function createTextCanvas(text) {
     const controllerData = controller.gamepad;
 		if ( userData.isSelecting === true ) {//コントローラーボタンが押された際の処理
       
-      if(controllerData.buttons[0].pressed == true){
+      if(controllerData.buttons[0].pressed == true){//トリガーボタン
         cameraContainer.position.y += controllerData.buttons[0].value;
-      }else if(controllerData.buttons[1].pressed == true){
+      }else if(controllerData.buttons[1].pressed == true){//スクイーズボタン
         cameraContainer.position.y -= controllerData.buttons[1].value;
       }else if(controllerData.buttons[2].pressed == true){
+        cameraContainer.position.x -= controllerData.buttons[1].value;
       }else if(controllerData.buttons[3].pressed == true){
+        cameraContainer.position.x -= controllerData.buttons[1].value;
       }else if(controllerData.buttons[4].pressed == true){
+        cameraContainer.position.z -= controllerData.buttons[1].value;
       }else if(controllerData.buttons[5].pressed == true){
+        cameraContainer.position.z -= controllerData.buttons[1].value;
       }else if(controllerData.buttons[6].pressed == true){
+        cameraContainer.position.y -= controllerData.buttons[1].value;
       }
 		} else {
       let cameraRotation = camera.rotation;
@@ -394,6 +399,7 @@ function createTextCanvas(text) {
 
   function handleController2( controller ) {//controller2の処理
     const controllerData = controller.gamepad;
+    console.log(controller);
     if(controllerData.buttons[0].pressed == true){
       // レイと交差しているシェイプの取得
       const intersections = getIntersectionsAccident(controller);
@@ -409,7 +415,7 @@ function createTextCanvas(text) {
         }else if(object.geometry.type == 'CylinderGeometry'){//交通事故の処理
           object.material.color.g = 0.2;
           intersected.push(object);
-          console.log(intersection);
+          // console.log(intersection);
         }
         // console.log(object);
         if(!detailsObj.visible){
@@ -642,7 +648,7 @@ function createTrafficVolumeObject(pos1Z, pos1X, pos2Z, pos2X, wid, num){//Road[
   
   let lenge = direction.length();
   direction.normalize();
-  console.log(lenge);
+  // console.log(lenge);
   const geometry = new THREE.BoxGeometry(wid*3,5,lenge);
   const cube = new THREE.Mesh(geometry, material);
   cube.material.transparent = true;
