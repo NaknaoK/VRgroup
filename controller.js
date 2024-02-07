@@ -366,7 +366,7 @@ function createTextCanvas(text) {
 	function handleController1( controller ) {//controller1の処理
 		const userData = controller.userData;
     const controllerData = controller.gamepad;
-		if ( userData.isSelecting === true ) {//コントローラーボタンが押された際の処理
+		if ( userData.isSelecting === false ) {//コントローラーボタンが押された際の処理
       
       if(controllerData.buttons[0].pressed == true){//トリガーボタン
         cameraContainer.position.y += controllerData.buttons[0].value;
