@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { VRButton } from "three/addons/webxr/VRButton.js";
 // WebXRのポリフィルを読み込み
 import WebXRPolyfill from "webxr-polyfill";
+//コントローラをモデリングするやつ、three@0.150.1は使用バージョン
 import { XRControllerModelFactory } from 'https://unpkg.com/three@0.150.1/examples/jsm/webxr/XRControllerModelFactory.js';
 //PC上で滑らかにカメラコントローラーを制御する為に使用↓
 import { OrbitControls } from 'https://unpkg.com/three@0.150.1/examples/jsm/controls/OrbitControls.js';
@@ -49,7 +50,7 @@ async function init() {
   let Road = [];
   let worldTimer = 8;
   
-  // カメラ用コンテナを作成(3Dのカメラを箱に入れて箱自体を動かす) 
+  // カメラ用コンテナを作成(3Dのカメラを箱に入れて箱自体を動かす) ＜ーーーーーー大事！カメラ自体を動かせないらしい
   const cameraContainer = new THREE.Object3D();
   cameraContainer.position.set( 2, 20, 5 );
   cameraContainer.add(camera);
@@ -60,14 +61,10 @@ async function init() {
 
   //マップのデータ
   const CenterLatitude = 356791527,CenterLongitude = 1397686666;//中心の緯度,経度（度）
-  const East = convertLatitudeAndLongitude("1394630000"),
+  const East = convertLatitudeAndLongitude("1394630000"),//東西南北の緯度、経度（度）
         West = convertLatitudeAndLongitude("1394545000"),
         North = convertLatitudeAndLongitude("354060000"),
         South = convertLatitudeAndLongitude("354030000");
-        console.log(East);
-        console.log(West);
-        console.log(North);
-        console.log(South);
   // 光源を作成
   {
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
@@ -190,14 +187,14 @@ async function init() {
   var groupsToIntersect = [accidentGroup,volumeGroup];
 
   function convertLatitudeAndLongitude(str){ //度分秒から度に変換する
-    let strCount = str.toString().length;
-    if(strCount == 9){//読み込んだ緯度のデータを変換する
+    let strCount = str.toString().length;//交通省のデータが度分秒で配布してるから
+    if(strCount == 9){//読み込んだ緯度（9桁）のデータを変換する
       var deg = Number(str.slice(0,2));//度
       var min = Number(str.slice(2,4));//分
       var sec = Number(str.slice(4));//秒
       var result = Math.round((deg+min/60+sec/1/3600000)*10000000);
       return result;
-    }else{//読み込んだ経度のデータを変換する
+    }else{//読み込んだ経度（8桁のはず）のデータを変換する
       var deg = Number(str.slice(0,3));//度
       var min = Number(str.slice(3,5));//分
       var sec = Number(str.slice(5));//秒
@@ -234,16 +231,16 @@ async function init() {
   /* ----コントローラー設定----- */
   
   // コントローラーイベントの設定
-  function onSelectStart() {
+  function onSelectStart() {//トリガーボタンを押したら発火
     this.userData.isSelecting = true;
   }
-  function onSelectEnd() {
+  function onSelectEnd() {//トリガーボタンを離したら発火
     this.userData.isSelecting = false;
   }
-  function onSqueezeStart(){
+  function onSqueezeStart(){//スクイーズボタンを押したら発火
     this.userData.isSelecting = true;
   }
-  function onSqueezeEnd(){
+  function onSqueezeEnd(){//スクイーズボタンを離したら発火
     this.userData.isSelecting = false;
   }
 
@@ -261,10 +258,10 @@ async function init() {
   //   // ここでサムスティックの値に基づいた処理を実装
   // });
   controller1.addEventListener( 'connected', ( event )=> {
-    if('gamepad' in event.data){
+    if('gamepad' in event.data){//接続した際にコントローラの情報を渡していたはず
         if('axes' in event.data.gamepad){
           controller1.gamepad = event.data.gamepad;
-          VRconnect = true;
+          VRconnect = true;//接続されたかのフラグ
         }
     }
   });
@@ -337,7 +334,7 @@ function createTextCanvas(text) {
   context.textBaseline = 'top';
   let measure=context.measureText(text);
   canvas.width=measure.width;
-  canvas.height=2*(measure.fontBoundingBoxAscent+measure.fontBoundingBoxDescent);
+  canvas.height=2*(measure.fontBoundingBoxAscent+measure.fontBoundingBoxDescent);//キャンバスの高さを調節、たぶん2倍ぐらいにする
   // console.log(context);
   context.font = '16px UTF-8';
   // context.fillStyle = 'black';
@@ -351,12 +348,12 @@ function createTextCanvas(text) {
   context.globalCompositeOperation = 'source-over';
   context.fillStyle='white';
   // context.fillText(text, canvas.width / 2, canvas.height / 2);
-  const lines = text.split('\n');
+  const lines = text.split('\n');//改行で切る
   for (let i = 0; i < lines.length; i++) {
     context.fillText(lines[i],canvas.width / 2, canvas.height / 4 +i*20);
   }
   // context.fillText(text,Math.abs(measure.actualBoundingBoxLeft),measure.actualBoundingBoxAscent);
-  let png=canvas.toDataURL('image/png');
+  let png=canvas.toDataURL('image/png');//キャンバスに画像を張り付ける
   // return canvas;
   return {img:png, w:canvas.width, h:canvas.height};
 }
@@ -407,18 +404,18 @@ function createTextCanvas(text) {
         const intersection = intersections[0];
         const object = intersection.object;
         if(object.geometry.type == 'BoxGeometry'){//交通量の処理
-          object.material.opacity = 0.4;
+          object.material.opacity = 0.4;//透明度変更
           // object.material.color.g = 0.2;
           intersected.push(object);
           // console.log(trafficAccident[0][7]);
           // console.log(object);
         }else if(object.geometry.type == 'CylinderGeometry'){//交通事故の処理
-          object.material.color.g = 0.2;
+          object.material.color.g = 0.2;//オブジェの緑を変更
           intersected.push(object);
           // console.log(intersection);
         }
         // console.log(object);
-        if(!detailsObj.visible){
+        if(!detailsObj.visible){//オブジェクト見えるフラグがfalseなら実行
           detailsObj.visible = true;
           //詳細表示の画像作成//////////////////////////////////////////////////////
           const N = object.name;
